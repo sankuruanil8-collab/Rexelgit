@@ -1,0 +1,9 @@
+{
+	"name": "rexeladf1",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "eeb452b6-92d0-4e0c-bb27-71ead7769f18",
+		"tenantId": "78ab3e31-ed36-41ee-9912-1ff92e43f04b"
+	}
+}
