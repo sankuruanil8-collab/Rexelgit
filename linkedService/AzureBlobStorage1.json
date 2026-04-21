@@ -1,0 +1,18 @@
+{
+	"name": "AzureBlobStorage1",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobStorage",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "AzureKeyVault1",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "rexelblobsecretnew",
+				"secretVersion": "26a6458151814b8090f09f61aa71b1a9"
+			}
+		}
+	}
+}
