@@ -7,6 +7,14 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "rexeladf1"
 		},
+		"AzureSqlDatabase1_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'AzureSqlDatabase1'"
+		},
+		"MySql1_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'MySql1'"
+		},
 		"AzureBlobStorage1_properties_typeProperties_connectionString_secretName": {
 			"type": "string",
 			"defaultValue": "rexelblobsecretnew"
@@ -18,6 +26,34 @@
 		"AzureKeyVault1_properties_typeProperties_baseUrl": {
 			"type": "string",
 			"defaultValue": "https://rexelkeyvault.vault.azure.net/"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "rexelsqlserver.database.windows.net"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "rexelsqldb"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "aniladmin"
+		},
+		"CosmosDbNoSql1_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "cosmosdbsecretnew"
+		},
+		"MySql1_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "rexelmysqlserver1new.mysql.database.azure.com"
+		},
+		"MySql1_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "rexelmain"
+		},
+		"MySql1_properties_typeProperties_username": {
+			"type": "string",
+			"defaultValue": "aniladmin"
 		},
 		"EventTriggerBlobtoADLS1_properties_typeProperties_scope": {
 			"type": "string",
@@ -50,14 +86,41 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"AzureSqlDatabase1_password": {
+						"value": "[parameters('AzureSqlDatabase1_password')]"
+					},
+					"MySql1_password": {
+						"value": "[parameters('MySql1_password')]"
+					},
 					"AzureKeyVault1_properties_typeProperties_baseUrl": {
 						"value": "[parameters('AzureKeyVault1_properties_typeProperties_baseUrl')]"
+					},
+					"AzureSqlDatabase1_properties_typeProperties_server": {
+						"value": "[parameters('AzureSqlDatabase1_properties_typeProperties_server')]"
+					},
+					"AzureSqlDatabase1_properties_typeProperties_database": {
+						"value": "[parameters('AzureSqlDatabase1_properties_typeProperties_database')]"
+					},
+					"AzureSqlDatabase1_properties_typeProperties_userName": {
+						"value": "[parameters('AzureSqlDatabase1_properties_typeProperties_userName')]"
 					},
 					"AzureBlobStorage1_properties_typeProperties_connectionString_secretName": {
 						"value": "[parameters('AzureBlobStorage1_properties_typeProperties_connectionString_secretName')]"
 					},
 					"AzureDataLakeStorage1_properties_typeProperties_url": {
 						"value": "[parameters('AzureDataLakeStorage1_properties_typeProperties_url')]"
+					},
+					"CosmosDbNoSql1_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('CosmosDbNoSql1_properties_typeProperties_connectionString_secretName')]"
+					},
+					"MySql1_properties_typeProperties_server": {
+						"value": "[parameters('MySql1_properties_typeProperties_server')]"
+					},
+					"MySql1_properties_typeProperties_database": {
+						"value": "[parameters('MySql1_properties_typeProperties_database')]"
+					},
+					"MySql1_properties_typeProperties_username": {
+						"value": "[parameters('MySql1_properties_typeProperties_username')]"
 					},
 					"EventTriggerBlobtoADLS1_properties_typeProperties_scope": {
 						"value": "[parameters('EventTriggerBlobtoADLS1_properties_typeProperties_scope')]"

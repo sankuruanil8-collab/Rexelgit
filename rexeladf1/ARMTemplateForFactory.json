@@ -7,6 +7,14 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "rexeladf1"
 		},
+		"AzureSqlDatabase1_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'AzureSqlDatabase1'"
+		},
+		"MySql1_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'MySql1'"
+		},
 		"AzureBlobStorage1_properties_typeProperties_connectionString_secretName": {
 			"type": "string",
 			"defaultValue": "rexelblobsecretnew"
@@ -18,6 +26,34 @@
 		"AzureKeyVault1_properties_typeProperties_baseUrl": {
 			"type": "string",
 			"defaultValue": "https://rexelkeyvault.vault.azure.net/"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "rexelsqlserver.database.windows.net"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "rexelsqldb"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "aniladmin"
+		},
+		"CosmosDbNoSql1_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "cosmosdbsecretnew"
+		},
+		"MySql1_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "rexelmysqlserver1new.mysql.database.azure.com"
+		},
+		"MySql1_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "rexelmain"
+		},
+		"MySql1_properties_typeProperties_username": {
+			"type": "string",
+			"defaultValue": "aniladmin"
 		},
 		"EventTriggerBlobtoADLS1_properties_typeProperties_scope": {
 			"type": "string",
@@ -37,6 +73,60 @@
 					{
 						"name": "Copy data1",
 						"type": "Copy",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "MySqlSource"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "MySqlTable1",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "AdlsSinkbronze",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "Copy data2",
+						"type": "Copy",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
@@ -50,9 +140,9 @@
 							"source": {
 								"type": "DelimitedTextSource",
 								"storeSettings": {
-									"type": "AzureBlobStorageReadSettings",
+									"type": "AzureBlobFSReadSettings",
 									"recursive": true,
-									"wildcardFileName": "*.csv",
+									"wildcardFileName": "*",
 									"enablePartitionDiscovery": false
 								},
 								"formatSettings": {
@@ -82,11 +172,13 @@
 						},
 						"inputs": [
 							{
-								"referenceName": "Sourceblob",
+								"referenceName": "AdlsSinkbronze",
 								"type": "DatasetReference",
 								"parameters": {
-									"sourcecontainername": "input",
-									"sourcefilename": "*"
+									"container": {
+										"value": "@pipeline().parameters.sourcecontainer",
+										"type": "Expression"
+									}
 								}
 							}
 						],
@@ -94,7 +186,12 @@
 							{
 								"referenceName": "AdlsSinkbronze",
 								"type": "DatasetReference",
-								"parameters": {}
+								"parameters": {
+									"container": {
+										"value": "@pipeline().parameters.sinkcontainer",
+										"type": "Expression"
+									}
+								}
 							}
 						]
 					}
@@ -102,10 +199,24 @@
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
+				"parameters": {
+					"sourcecontainer": {
+						"type": "string",
+						"defaultValue": "rawinput"
+					},
+					"sinkcontainer": {
+						"type": "string",
+						"defaultValue": "bronze"
+					},
+					"sourcefile": {
+						"type": "string",
+						"defaultValue": "*"
+					}
+				},
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/Sourceblob')]",
+				"[concat(variables('factoryId'), '/datasets/MySqlTable1')]",
 				"[concat(variables('factoryId'), '/datasets/AdlsSinkbronze')]"
 			]
 		},
@@ -118,12 +229,20 @@
 					"referenceName": "AzureDataLakeStorage1",
 					"type": "LinkedServiceReference"
 				},
+				"parameters": {
+					"container": {
+						"type": "string"
+					}
+				},
 				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileSystem": "bronze"
+						"fileSystem": {
+							"value": "@dataset().container",
+							"type": "Expression"
+						}
 					},
 					"columnDelimiter": ",",
 					"escapeChar": "\\",
@@ -134,6 +253,26 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MySqlTable1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "MySql1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "MySqlTable",
+				"schema": [],
+				"typeProperties": {
+					"tableName": "employees"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/MySql1')]"
 			]
 		},
 		{
@@ -239,13 +378,87 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlDatabase1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"server": "[parameters('AzureSqlDatabase1_properties_typeProperties_server')]",
+					"database": "[parameters('AzureSqlDatabase1_properties_typeProperties_database')]",
+					"encrypt": "optional",
+					"trustServerCertificate": false,
+					"authenticationType": "SQL",
+					"userName": "[parameters('AzureSqlDatabase1_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('AzureSqlDatabase1_password')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CosmosDbNoSql1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "CosmosDb",
+				"typeProperties": {
+					"connectionString": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "AzureKeyVault1",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "[parameters('CosmosDbNoSql1_properties_typeProperties_connectionString_secretName')]",
+						"secretVersion": "2bb720b528344cf0a1f04b68c53c1c74"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureKeyVault1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MySql1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "MySql",
+				"typeProperties": {
+					"server": "[parameters('MySql1_properties_typeProperties_server')]",
+					"port": 3306,
+					"database": "[parameters('MySql1_properties_typeProperties_database')]",
+					"username": "[parameters('MySql1_properties_typeProperties_username')]",
+					"sslMode": 1,
+					"useSystemTrustStore": 0,
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('MySql1_password')]"
+					},
+					"driverVersion": "v2"
+				},
+				"connectVia": {
+					"referenceName": "SelfHostedIR",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/SelfHostedIR')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/EventTriggerBlobtoADLS1')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"description": "EventTriggerBlobtoADLS1",
 				"annotations": [],
-				"runtimeState": "Stopped",
+				"runtimeState": "Started",
 				"pipelines": [
 					{
 						"pipelineReference": {
@@ -270,6 +483,16 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/pipeline1')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SelfHostedIR')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {}
+			},
+			"dependsOn": []
 		}
 	]
 }

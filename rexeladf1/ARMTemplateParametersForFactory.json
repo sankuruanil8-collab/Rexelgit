@@ -5,6 +5,12 @@
 		"factoryName": {
 			"value": "rexeladf1"
 		},
+		"AzureSqlDatabase1_password": {
+			"value": ""
+		},
+		"MySql1_password": {
+			"value": ""
+		},
 		"AzureBlobStorage1_properties_typeProperties_connectionString_secretName": {
 			"value": "rexelblobsecretnew"
 		},
@@ -13,6 +19,27 @@
 		},
 		"AzureKeyVault1_properties_typeProperties_baseUrl": {
 			"value": "https://rexelkeyvault.vault.azure.net/"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_server": {
+			"value": "rexelsqlserver.database.windows.net"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_database": {
+			"value": "rexelsqldb"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_userName": {
+			"value": "aniladmin"
+		},
+		"CosmosDbNoSql1_properties_typeProperties_connectionString_secretName": {
+			"value": "cosmosdbsecretnew"
+		},
+		"MySql1_properties_typeProperties_server": {
+			"value": "rexelmysqlserver1new.mysql.database.azure.com"
+		},
+		"MySql1_properties_typeProperties_database": {
+			"value": "rexelmain"
+		},
+		"MySql1_properties_typeProperties_username": {
+			"value": "aniladmin"
 		},
 		"EventTriggerBlobtoADLS1_properties_typeProperties_scope": {
 			"value": "/subscriptions/398fed49-ff5a-4b9d-869b-7f3b9182afb2/resourceGroups/RexelHoldings/providers/Microsoft.Storage/storageAccounts/rexelblob"
