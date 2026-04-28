@@ -7,24 +7,14 @@
 		},
 		"parameters": {
 			"ContainerName": {
-				"type": "string",
-				"defaultValue": "input"
-			},
-			"FileName": {
-				"type": "string",
-				"defaultValue": "*"
+				"type": "string"
 			}
 		},
 		"annotations": [],
 		"type": "Excel",
 		"typeProperties": {
-			"sheetName": "Sheet1",
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": {
-					"value": "@dataset().FileName",
-					"type": "Expression"
-				},
 				"container": {
 					"value": "@dataset().ContainerName",
 					"type": "Expression"
