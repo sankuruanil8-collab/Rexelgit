@@ -31,6 +31,10 @@
 			"type": "string",
 			"defaultValue": "aniladmin"
 		},
+		"EventTriggerBlobtoADLS1_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/398fed49-ff5a-4b9d-869b-7f3b9182afb2/resourceGroups/RexelHoldings/providers/Microsoft.Storage/storageAccounts/rexelblob"
+		},
 		"AzureBlobStorage1_properties_typeProperties_connectionString_secretName": {
 			"type": "string",
 			"defaultValue": "rexelblobsecretnew"
@@ -55,9 +59,21 @@
 			"type": "string",
 			"defaultValue": "aniladmin"
 		},
-		"EventTriggerBlobtoADLS1_properties_typeProperties_scope": {
+		"rexelcosmosdb_properties_typeProperties_connectionString_secretName": {
 			"type": "string",
-			"defaultValue": "/subscriptions/398fed49-ff5a-4b9d-869b-7f3b9182afb2/resourceGroups/RexelHoldings/providers/Microsoft.Storage/storageAccounts/rexelblob"
+			"defaultValue": "cosmosdbsecretnew"
+		},
+		"ETL-Trigger_properties_ETL-Pipeline_parameters_SourceContainer": {
+			"type": "string",
+			"defaultValue": "rawinput"
+		},
+		"ETL-Trigger_properties_ETL-Pipeline_parameters_SinkContainer": {
+			"type": "string",
+			"defaultValue": "bronze"
+		},
+		"ETL-Trigger_properties_ETL-Pipeline_parameters_SourceTableName": {
+			"type": "string",
+			"defaultValue": "employees"
 		}
 	},
 	"variables": {
@@ -95,6 +111,29 @@
 						"type": "SecureString",
 						"value": "[parameters('AzureSqlDatabase1_password')]"
 					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/EventTriggerBlobtoADLS1')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "EventTriggerBlobtoADLS1",
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/input/blobs/",
+					"blobPathEndsWith": ".csv",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('EventTriggerBlobtoADLS1_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated",
+						"Microsoft.Storage.BlobDeleted"
+					]
 				}
 			},
 			"dependsOn": []
@@ -209,7 +248,53 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/AdlsSinkbronze')]",
+			"name": "[concat(parameters('factoryName'), '/rexelcosmosdb')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "CosmosDb",
+				"typeProperties": {
+					"connectionString": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "AzureKeyVault1",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "[parameters('rexelcosmosdb_properties_typeProperties_connectionString_secretName')]",
+						"secretVersion": "2bb720b528344cf0a1f04b68c53c1c74"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureKeyVault1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlSinkDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"TableName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AdlsSinkBronzeDS')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -218,7 +303,7 @@
 					"type": "LinkedServiceReference"
 				},
 				"parameters": {
-					"container": {
+					"Container": {
 						"type": "string"
 					}
 				},
@@ -228,7 +313,7 @@
 					"location": {
 						"type": "AzureBlobFSLocation",
 						"fileSystem": {
-							"value": "@dataset().container",
+							"value": "@dataset().Container",
 							"type": "Expression"
 						}
 					},
@@ -244,7 +329,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/MySqlTable1')]",
+			"name": "[concat(parameters('factoryName'), '/SourceMySqlDS')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -252,11 +337,19 @@
 					"referenceName": "MySql1",
 					"type": "LinkedServiceReference"
 				},
+				"parameters": {
+					"MySQLTableName": {
+						"type": "string"
+					}
+				},
 				"annotations": [],
 				"type": "MySqlTable",
 				"schema": [],
 				"typeProperties": {
-					"tableName": "employees"
+					"tableName": {
+						"value": "@dataset().MySQLTableName",
+						"type": "Expression"
+					}
 				}
 			},
 			"dependsOn": [
@@ -264,7 +357,27 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/Sourceblob')]",
+			"name": "[concat(parameters('factoryName'), '/SourceCosmosDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "rexelcosmosdb",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "CosmosDbSqlApiCollection",
+				"schema": {},
+				"typeProperties": {
+					"collectionName": "rexelcosmoscontainer"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/rexelcosmosdb')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SourceBlobExcelDS')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -273,31 +386,30 @@
 					"type": "LinkedServiceReference"
 				},
 				"parameters": {
-					"sourcecontainername": {
-						"type": "string"
+					"ContainerName": {
+						"type": "string",
+						"defaultValue": "input"
 					},
-					"sourcefilename": {
-						"type": "string"
+					"FileName": {
+						"type": "string",
+						"defaultValue": "*"
 					}
 				},
 				"annotations": [],
-				"type": "DelimitedText",
+				"type": "Excel",
 				"typeProperties": {
+					"sheetName": "Sheet1",
 					"location": {
 						"type": "AzureBlobStorageLocation",
 						"fileName": {
-							"value": "@dataset().sourcefilename",
+							"value": "@dataset().FileName",
 							"type": "Expression"
 						},
 						"container": {
-							"value": "@dataset().sourcecontainername",
+							"value": "@dataset().ContainerName",
 							"type": "Expression"
 						}
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
+					}
 				},
 				"schema": []
 			},
@@ -306,20 +418,18 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
+			"name": "[concat(parameters('factoryName'), '/ETL-Pipeline')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "Copy data1",
+						"name": "CopyMysqltoBroze",
 						"type": "Copy",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [],
 						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
+							"timeout": "0.00:30:00",
+							"retry": 2,
 							"retryIntervalInSeconds": 30,
 							"secureOutput": false,
 							"secureInput": false
@@ -337,7 +447,7 @@
 								"formatSettings": {
 									"type": "DelimitedTextWriteSettings",
 									"quoteAllText": true,
-									"fileExtension": ".txt"
+									"fileExtension": ".csv"
 								}
 							},
 							"enableStaging": false,
@@ -352,26 +462,36 @@
 						},
 						"inputs": [
 							{
-								"referenceName": "MySqlTable1",
+								"referenceName": "SourceMySqlDS",
 								"type": "DatasetReference",
-								"parameters": {}
+								"parameters": {
+									"MySQLTableName": {
+										"value": "@pipeline().parameters.SourceTableName",
+										"type": "Expression"
+									}
+								}
 							}
 						],
 						"outputs": [
 							{
-								"referenceName": "AdlsSinkbronze",
+								"referenceName": "AdlsSinkBronzeDS",
 								"type": "DatasetReference",
-								"parameters": {}
+								"parameters": {
+									"Container": {
+										"value": "@pipeline().parameters.SinkContainer",
+										"type": "Expression"
+									}
+								}
 							}
 						]
 					},
 					{
-						"name": "Copy data2",
+						"name": "CopyADLStoBronze",
 						"type": "Copy",
 						"dependsOn": [],
 						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
+							"timeout": "0.00:30:00",
+							"retry": 2,
 							"retryIntervalInSeconds": 30,
 							"secureOutput": false,
 							"secureInput": false
@@ -413,11 +533,11 @@
 						},
 						"inputs": [
 							{
-								"referenceName": "AdlsSinkbronze",
+								"referenceName": "AdlsSinkBronzeDS",
 								"type": "DatasetReference",
 								"parameters": {
-									"container": {
-										"value": "@pipeline().parameters.sourcecontainer",
+									"Container": {
+										"value": "@pipeline().parameters.SourceContainer",
 										"type": "Expression"
 									}
 								}
@@ -425,73 +545,244 @@
 						],
 						"outputs": [
 							{
-								"referenceName": "AdlsSinkbronze",
+								"referenceName": "AdlsSinkBronzeDS",
 								"type": "DatasetReference",
 								"parameters": {
-									"container": {
+									"Container": {
+										"value": "@pipeline().parameters.SinkContainer",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "CopyCosmostoBronze",
+						"type": "Copy",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.00:30:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "CosmosDbSqlApiSource",
+								"query": "select * from rexelcosmoscontainer",
+								"preferredRegions": []
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "SourceCosmosDS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "AdlsSinkBronzeDS",
+								"type": "DatasetReference",
+								"parameters": {
+									"Container": {
 										"value": "@pipeline().parameters.sinkcontainer",
 										"type": "Expression"
 									}
 								}
 							}
 						]
+					},
+					{
+						"name": "CopyBlobtoBronze",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ExcelSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*",
+									"enablePartitionDiscovery": false
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SourceBlobExcelDS",
+								"type": "DatasetReference",
+								"parameters": {
+									"ContainerName": "input",
+									"FileName": "*"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "AdlsSinkBronzeDS",
+								"type": "DatasetReference",
+								"parameters": {
+									"Container": {
+										"value": "@pipeline().parameters.SinkContainer",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
+						"dependsOn": [
+							{
+								"activity": "CopyADLStoBronze",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "CopyMysqltoBroze",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "CopyBlobtoBronze",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "CopyCosmostoBronze",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
 					}
 				],
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
 				"parameters": {
-					"sourcecontainer": {
+					"SourceContainer": {
 						"type": "string",
 						"defaultValue": "rawinput"
 					},
-					"sinkcontainer": {
+					"SinkContainer": {
 						"type": "string",
 						"defaultValue": "bronze"
 					},
-					"sourcefile": {
+					"SourceTableName": {
 						"type": "string",
-						"defaultValue": "*"
+						"defaultValue": "employees"
 					}
 				},
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/MySqlTable1')]",
-				"[concat(variables('factoryId'), '/datasets/AdlsSinkbronze')]"
+				"[concat(variables('factoryId'), '/datasets/SourceMySqlDS')]",
+				"[concat(variables('factoryId'), '/datasets/AdlsSinkBronzeDS')]",
+				"[concat(variables('factoryId'), '/datasets/SourceCosmosDS')]",
+				"[concat(variables('factoryId'), '/datasets/SourceBlobExcelDS')]"
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/EventTriggerBlobtoADLS1')]",
+			"name": "[concat(parameters('factoryName'), '/ETL-Trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"description": "EventTriggerBlobtoADLS1",
 				"annotations": [],
 				"runtimeState": "Started",
 				"pipelines": [
 					{
 						"pipelineReference": {
-							"referenceName": "pipeline1",
+							"referenceName": "ETL-Pipeline",
 							"type": "PipelineReference"
 						},
-						"parameters": {}
+						"parameters": {
+							"SourceContainer": "[parameters('ETL-Trigger_properties_ETL-Pipeline_parameters_SourceContainer')]",
+							"SinkContainer": "[parameters('ETL-Trigger_properties_ETL-Pipeline_parameters_SinkContainer')]",
+							"SourceTableName": "[parameters('ETL-Trigger_properties_ETL-Pipeline_parameters_SourceTableName')]"
+						}
 					}
 				],
-				"type": "BlobEventsTrigger",
+				"type": "ScheduleTrigger",
 				"typeProperties": {
-					"blobPathBeginsWith": "/input/blobs/",
-					"blobPathEndsWith": ".csv",
-					"ignoreEmptyBlobs": true,
-					"scope": "[parameters('EventTriggerBlobtoADLS1_properties_typeProperties_scope')]",
-					"events": [
-						"Microsoft.Storage.BlobCreated",
-						"Microsoft.Storage.BlobDeleted"
-					]
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2026-04-28T12:00:00",
+						"timeZone": "India Standard Time",
+						"schedule": {}
+					}
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/pipeline1')]"
+				"[concat(variables('factoryId'), '/pipelines/ETL-Pipeline')]"
 			]
 		}
 	]

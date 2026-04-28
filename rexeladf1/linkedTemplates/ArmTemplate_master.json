@@ -59,6 +59,22 @@
 			"type": "string",
 			"defaultValue": "/subscriptions/398fed49-ff5a-4b9d-869b-7f3b9182afb2/resourceGroups/RexelHoldings/providers/Microsoft.Storage/storageAccounts/rexelblob"
 		},
+		"rexelcosmosdb_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "cosmosdbsecretnew"
+		},
+		"ETL-Trigger_properties_ETL-Pipeline_parameters_SourceContainer": {
+			"type": "string",
+			"defaultValue": "rawinput"
+		},
+		"ETL-Trigger_properties_ETL-Pipeline_parameters_SinkContainer": {
+			"type": "string",
+			"defaultValue": "bronze"
+		},
+		"ETL-Trigger_properties_ETL-Pipeline_parameters_SourceTableName": {
+			"type": "string",
+			"defaultValue": "employees"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -104,6 +120,9 @@
 					"AzureSqlDatabase1_properties_typeProperties_userName": {
 						"value": "[parameters('AzureSqlDatabase1_properties_typeProperties_userName')]"
 					},
+					"EventTriggerBlobtoADLS1_properties_typeProperties_scope": {
+						"value": "[parameters('EventTriggerBlobtoADLS1_properties_typeProperties_scope')]"
+					},
 					"AzureBlobStorage1_properties_typeProperties_connectionString_secretName": {
 						"value": "[parameters('AzureBlobStorage1_properties_typeProperties_connectionString_secretName')]"
 					},
@@ -122,8 +141,17 @@
 					"MySql1_properties_typeProperties_username": {
 						"value": "[parameters('MySql1_properties_typeProperties_username')]"
 					},
-					"EventTriggerBlobtoADLS1_properties_typeProperties_scope": {
-						"value": "[parameters('EventTriggerBlobtoADLS1_properties_typeProperties_scope')]"
+					"rexelcosmosdb_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('rexelcosmosdb_properties_typeProperties_connectionString_secretName')]"
+					},
+					"ETL-Trigger_properties_ETL-Pipeline_parameters_SourceContainer": {
+						"value": "[parameters('ETL-Trigger_properties_ETL-Pipeline_parameters_SourceContainer')]"
+					},
+					"ETL-Trigger_properties_ETL-Pipeline_parameters_SinkContainer": {
+						"value": "[parameters('ETL-Trigger_properties_ETL-Pipeline_parameters_SinkContainer')]"
+					},
+					"ETL-Trigger_properties_ETL-Pipeline_parameters_SourceTableName": {
+						"value": "[parameters('ETL-Trigger_properties_ETL-Pipeline_parameters_SourceTableName')]"
 					}
 				}
 			},
