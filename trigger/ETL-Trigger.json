@@ -1,0 +1,29 @@
+{
+	"name": "ETL-Trigger",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "ETL-Pipeline",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"SourceContainer": "rawinput",
+					"SinkContainer": "bronze",
+					"SourceTableName": "employees"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2026-04-28T12:00:00",
+				"timeZone": "India Standard Time"
+			}
+		}
+	}
+}
