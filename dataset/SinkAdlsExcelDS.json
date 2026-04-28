@@ -1,0 +1,26 @@
+{
+	"name": "SinkAdlsExcelDS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Container": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Excel",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileSystem": {
+					"value": "@dataset().Container",
+					"type": "Expression"
+				}
+			}
+		},
+		"schema": []
+	}
+}
