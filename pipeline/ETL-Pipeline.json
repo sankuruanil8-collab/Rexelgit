@@ -237,8 +237,10 @@
 						"referenceName": "SourceBlobExcelDS",
 						"type": "DatasetReference",
 						"parameters": {
-							"ContainerName": "input",
-							"FileName": "*"
+							"ContainerName": {
+								"value": "@pipeline().parameters.SourceBlobContainer",
+								"type": "Expression"
+							}
 						}
 					}
 				],
@@ -315,6 +317,10 @@
 			"SourceTableName": {
 				"type": "string",
 				"defaultValue": "employees"
+			},
+			"SourceBlobContainer": {
+				"type": "string",
+				"defaultValue": "input"
 			}
 		},
 		"annotations": []
