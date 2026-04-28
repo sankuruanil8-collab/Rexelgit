@@ -41,7 +41,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "MySqlTableDS",
+						"referenceName": "SourceMySqlDS",
 						"type": "DatasetReference",
 						"parameters": {
 							"MySQLTableName": {
