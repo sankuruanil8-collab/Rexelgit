@@ -1,5 +1,5 @@
 {
-	"name": "MySqlTable1",
+	"name": "MySqlTableDS",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "MySql1",
