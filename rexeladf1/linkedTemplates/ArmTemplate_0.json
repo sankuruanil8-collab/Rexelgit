@@ -339,12 +339,7 @@
 				},
 				"parameters": {
 					"ContainerName": {
-						"type": "string",
-						"defaultValue": "input"
-					},
-					"FileName": {
-						"type": "string",
-						"defaultValue": "*"
+						"type": "string"
 					}
 				},
 				"annotations": [],
@@ -353,10 +348,6 @@
 					"sheetName": "Sheet1",
 					"location": {
 						"type": "AzureBlobStorageLocation",
-						"fileName": {
-							"value": "@dataset().FileName",
-							"type": "Expression"
-						},
 						"container": {
 							"value": "@dataset().ContainerName",
 							"type": "Expression"
@@ -659,8 +650,10 @@
 								"referenceName": "SourceBlobExcelDS",
 								"type": "DatasetReference",
 								"parameters": {
-									"ContainerName": "input",
-									"FileName": "*"
+									"ContainerName": {
+										"value": "@pipeline().parameters.SourceBlobContainer",
+										"type": "Expression"
+									}
 								}
 							}
 						],
@@ -741,6 +734,10 @@
 					"SourceTableName": {
 						"type": "string",
 						"defaultValue": "employees"
+					},
+					"SourceBlobContainer": {
+						"type": "string",
+						"defaultValue": "input"
 					}
 				},
 				"annotations": []
