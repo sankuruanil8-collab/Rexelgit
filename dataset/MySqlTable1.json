@@ -5,11 +5,20 @@
 			"referenceName": "MySql1",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"MySQLTableName": {
+				"type": "string",
+				"defaultValue": "employees"
+			}
+		},
 		"annotations": [],
 		"type": "MySqlTable",
 		"schema": [],
 		"typeProperties": {
-			"tableName": "employees"
+			"tableName": {
+				"value": "@dataset().MySQLTableName",
+				"type": "Expression"
+			}
 		}
 	}
 }
