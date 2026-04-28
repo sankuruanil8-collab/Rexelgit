@@ -55,10 +55,6 @@
 			"type": "string",
 			"defaultValue": "aniladmin"
 		},
-		"EventTriggerBlobtoADLS1_properties_typeProperties_scope": {
-			"type": "string",
-			"defaultValue": "/subscriptions/398fed49-ff5a-4b9d-869b-7f3b9182afb2/resourceGroups/RexelHoldings/providers/Microsoft.Storage/storageAccounts/rexelblob"
-		},
 		"rexelcosmosdb_properties_typeProperties_connectionString_secretName": {
 			"type": "string",
 			"defaultValue": "cosmosdbsecretnew"
@@ -74,6 +70,10 @@
 		"ETL-Trigger_properties_ETL-Pipeline_parameters_SourceTableName": {
 			"type": "string",
 			"defaultValue": "employees"
+		},
+		"EventTriggerBlobtoADLS1_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/398fed49-ff5a-4b9d-869b-7f3b9182afb2/resourceGroups/RexelHoldings/providers/Microsoft.Storage/storageAccounts/rexelblob"
 		},
 		"containerUri": {
 			"type": "string",
