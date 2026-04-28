@@ -1,0 +1,35 @@
+{
+	"name": "SourceBlobExcelDS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"ContainerName": {
+				"type": "string",
+				"defaultValue": "input"
+			},
+			"FileName": {
+				"type": "string",
+				"defaultValue": "*"
+			}
+		},
+		"annotations": [],
+		"type": "Excel",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().FileName",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().ContainerName",
+					"type": "Expression"
+				}
+			}
+		},
+		"schema": []
+	}
+}
