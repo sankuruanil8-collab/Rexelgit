@@ -1,16 +1,14 @@
 {
-	"name": "pipeline1",
+	"name": "ETL-Pipeline",
 	"properties": {
 		"activities": [
 			{
-				"name": "Copy data1",
+				"name": "CopyMysqltoBroze",
 				"type": "Copy",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
+					"timeout": "0.00:30:00",
+					"retry": 2,
 					"retryIntervalInSeconds": 30,
 					"secureOutput": false,
 					"secureInput": false
@@ -28,7 +26,7 @@
 						"formatSettings": {
 							"type": "DelimitedTextWriteSettings",
 							"quoteAllText": true,
-							"fileExtension": ".txt"
+							"fileExtension": ".csv"
 						}
 					},
 					"enableStaging": false,
@@ -43,24 +41,36 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "MySqlTable1",
-						"type": "DatasetReference"
+						"referenceName": "MySqlTableDS",
+						"type": "DatasetReference",
+						"parameters": {
+							"MySQLTableName": {
+								"value": "@pipeline().parameters.SourceTableName",
+								"type": "Expression"
+							}
+						}
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "AdlsSinkbronze",
-						"type": "DatasetReference"
+						"referenceName": "AdlsSinkBronze",
+						"type": "DatasetReference",
+						"parameters": {
+							"Container": {
+								"value": "@pipeline().parameters.SinkContainer",
+								"type": "Expression"
+							}
+						}
 					}
 				]
 			},
 			{
-				"name": "Copy data2",
+				"name": "CopyADLStoBronze",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
+					"timeout": "0.00:30:00",
+					"retry": 2,
 					"retryIntervalInSeconds": 30,
 					"secureOutput": false,
 					"secureInput": false
@@ -102,11 +112,11 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "AdlsSinkbronze",
+						"referenceName": "AdlsSinkBronze",
 						"type": "DatasetReference",
 						"parameters": {
-							"container": {
-								"value": "@pipeline().parameters.sourcecontainer",
+							"Container": {
+								"value": "@pipeline().parameters.SourceContainer",
 								"type": "Expression"
 							}
 						}
@@ -114,30 +124,195 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "AdlsSinkbronze",
+						"referenceName": "AdlsSinkBronze",
 						"type": "DatasetReference",
 						"parameters": {
-							"container": {
+							"Container": {
+								"value": "@pipeline().parameters.SinkContainer",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "CopyCosmostoBronze",
+				"type": "Copy",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.00:30:00",
+					"retry": 2,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "CosmosDbSqlApiSource",
+						"query": "select * from rexelcosmoscontainer",
+						"preferredRegions": []
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "CosmosDbNoSqlContainer1",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AdlsSinkBronze",
+						"type": "DatasetReference",
+						"parameters": {
+							"Container": {
 								"value": "@pipeline().parameters.sinkcontainer",
 								"type": "Expression"
 							}
 						}
 					}
 				]
+			},
+			{
+				"name": "CopyBlobtoBronze",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "ExcelSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"wildcardFileName": "*",
+							"enablePartitionDiscovery": false
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "SourceBlobExcelDS",
+						"type": "DatasetReference",
+						"parameters": {
+							"ContainerName": "input",
+							"FileName": "*"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AdlsSinkBronze",
+						"type": "DatasetReference",
+						"parameters": {
+							"Container": {
+								"value": "@pipeline().parameters.SinkContainer",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Data flow1",
+				"type": "ExecuteDataFlow",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
+				"dependsOn": [
+					{
+						"activity": "CopyADLStoBronze",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "CopyMysqltoBroze",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "CopyBlobtoBronze",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "CopyCosmostoBronze",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
 			}
 		],
 		"parameters": {
-			"sourcecontainer": {
+			"SourceContainer": {
 				"type": "string",
 				"defaultValue": "rawinput"
 			},
-			"sinkcontainer": {
+			"SinkContainer": {
 				"type": "string",
 				"defaultValue": "bronze"
 			},
-			"sourcefile": {
+			"SourceTableName": {
 				"type": "string",
-				"defaultValue": "*"
+				"defaultValue": "employees"
 			}
 		},
 		"annotations": []
