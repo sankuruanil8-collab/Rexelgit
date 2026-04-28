@@ -53,7 +53,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "AdlsSinkBronze",
+						"referenceName": "AdlsSinkBronzeDS",
 						"type": "DatasetReference",
 						"parameters": {
 							"Container": {
@@ -112,7 +112,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "AdlsSinkBronze",
+						"referenceName": "AdlsSinkBronzeDS",
 						"type": "DatasetReference",
 						"parameters": {
 							"Container": {
@@ -124,7 +124,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "AdlsSinkBronze",
+						"referenceName": "AdlsSinkBronzeDS",
 						"type": "DatasetReference",
 						"parameters": {
 							"Container": {
@@ -170,13 +170,13 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "CosmosDbNoSqlContainer1",
+						"referenceName": "SourceCosmosDS",
 						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "AdlsSinkBronze",
+						"referenceName": "AdlsSinkBronzeDS",
 						"type": "DatasetReference",
 						"parameters": {
 							"Container": {
@@ -242,7 +242,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "AdlsSinkBronze",
+						"referenceName": "AdlsSinkBronzeDS",
 						"type": "DatasetReference",
 						"parameters": {
 							"Container": {
