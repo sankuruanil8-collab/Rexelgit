@@ -3,7 +3,7 @@
 	"properties": {
 		"description": "EventTriggerBlobtoADLS1",
 		"annotations": [],
-		"runtimeState": "Started",
+		"runtimeState": "Stopped",
 		"pipelines": [],
 		"type": "BlobEventsTrigger",
 		"typeProperties": {
