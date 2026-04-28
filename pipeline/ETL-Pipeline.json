@@ -67,6 +67,8 @@
 			{
 				"name": "CopyADLStoBronze",
 				"type": "Copy",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.00:15:00",
@@ -190,6 +192,8 @@
 			{
 				"name": "CopyBlobtoBronze",
 				"type": "Copy",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.00:15:00",
@@ -209,26 +213,7 @@
 							"enablePartitionDiscovery": false
 						}
 					},
-					"sink": {
-						"type": "DelimitedTextSink",
-						"storeSettings": {
-							"type": "AzureBlobFSWriteSettings"
-						},
-						"formatSettings": {
-							"type": "DelimitedTextWriteSettings",
-							"quoteAllText": true,
-							"fileExtension": ".csv"
-						}
-					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"typeConversion": true,
-						"typeConversionSettings": {
-							"allowDataTruncation": true,
-							"treatBooleanAsNumber": false
-						}
-					}
+					"enableStaging": false
 				},
 				"inputs": [
 					{
@@ -237,18 +222,6 @@
 						"parameters": {
 							"ContainerName": "input",
 							"FileName": "*"
-						}
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "AdlsSinkBronzeDS",
-						"type": "DatasetReference",
-						"parameters": {
-							"Container": {
-								"value": "@pipeline().parameters.SinkContainer",
-								"type": "Expression"
-							}
 						}
 					}
 				]
