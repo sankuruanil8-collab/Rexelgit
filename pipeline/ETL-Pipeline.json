@@ -53,7 +53,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "ADLS_DS",
+						"referenceName": "ADLS_CSV_DS",
 						"type": "DatasetReference",
 						"parameters": {
 							"Container": {
@@ -112,7 +112,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "ADLS_DS",
+						"referenceName": "ADLS_CSV_DS",
 						"type": "DatasetReference",
 						"parameters": {
 							"Container": {
@@ -124,7 +124,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "ADLS_DS",
+						"referenceName": "ADLS_CSV_DS",
 						"type": "DatasetReference",
 						"parameters": {
 							"Container": {
@@ -177,7 +177,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "ADLS_DS",
+						"referenceName": "ADLS_CSV_DS",
 						"type": "DatasetReference",
 						"parameters": {
 							"Container": {
