@@ -1,8 +1,8 @@
 {
-	"name": "AdlsSourceExcelDS",
+	"name": "BlobSourceExcelDS",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "AzureDataLakeStorage1",
+			"referenceName": "AzureBlobStorage1",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
@@ -18,8 +18,8 @@
 		"typeProperties": {
 			"sheetName": "Sheet1",
 			"location": {
-				"type": "AzureBlobFSLocation",
-				"fileSystem": {
+				"type": "AzureBlobStorageLocation",
+				"container": {
 					"value": "@dataset().Container",
 					"type": "Expression"
 				}
