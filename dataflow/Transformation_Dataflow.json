@@ -29,6 +29,7 @@
 				"     partitionBy('hash', 1)) ~> GetCSVFiles",
 				"GetCSVFiles sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
+				"     partitionFileNames:['Products.csv'],",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
