@@ -19,6 +19,18 @@
 						"referenceName": "Transformation_Dataflow",
 						"type": "DataFlowReference",
 						"datasetParameters": {
+							"GetCSVFiles": {
+								"Container": {
+									"value": "@pipeline().parameters.SourceContainer",
+									"type": "Expression"
+								}
+							},
+							"GetExcelFiles": {
+								"Container": {
+									"value": "@pipeline().parameters.SourceContainer",
+									"type": "Expression"
+								}
+							},
 							"SilverSink": {
 								"Container": {
 									"value": "@pipeline().parameters.SinkContainer",
