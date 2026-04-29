@@ -13,7 +13,7 @@
 				},
 				{
 					"dataset": {
-						"referenceName": "AdlsSourceExcelDS",
+						"referenceName": "BlobSourceExcelDS",
 						"type": "DatasetReference"
 					},
 					"name": "GetExcelFiles"
