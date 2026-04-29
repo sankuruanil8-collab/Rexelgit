@@ -25,7 +25,8 @@
 			"scriptLines": [
 				"source(allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false) ~> GetCSVFiles",
+				"     ignoreNoFilesFound: false,",
+				"     wildcardPaths:['*']) ~> GetCSVFiles",
 				"GetCSVFiles sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     umask: 0022,",
