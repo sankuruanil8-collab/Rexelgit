@@ -19,25 +19,7 @@
 						"referenceName": "Transformation_Dataflow",
 						"type": "DataFlowReference",
 						"datasetParameters": {
-							"GetFileCSV1": {
-								"Container": {
-									"value": "@pipeline().parameters.SourceContainer",
-									"type": "Expression"
-								}
-							},
-							"GetFileCSV2": {
-								"Container": {
-									"value": "@pipeline().parameters.SourceContainer",
-									"type": "Expression"
-								}
-							},
 							"SilverSink": {
-								"Container": {
-									"value": "@pipeline().parameters.SinkContainer",
-									"type": "Expression"
-								}
-							},
-							"SilverSink2": {
 								"Container": {
 									"value": "@pipeline().parameters.SinkContainer",
 									"type": "Expression"
