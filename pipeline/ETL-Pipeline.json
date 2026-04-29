@@ -5,6 +5,8 @@
 			{
 				"name": "CopyMysqltoBroze",
 				"type": "Copy",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.00:15:00",
@@ -67,6 +69,8 @@
 			{
 				"name": "CopyADLStoBronze",
 				"type": "Copy",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.00:15:00",
@@ -191,6 +195,8 @@
 			{
 				"name": "CopyBlobtoBronze",
 				"type": "Copy",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.00:15:00",
@@ -292,6 +298,75 @@
 					},
 					"traceLevel": "Fine"
 				}
+			},
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "ExcelSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"wildcardFileName": "*.xlsx",
+							"enablePartitionDiscovery": false
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings",
+							"copyBehavior": "FlattenHierarchy"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".csv"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "BlobSourceExcelDS",
+						"type": "DatasetReference",
+						"parameters": {
+							"Container": {
+								"value": "@pipeline().parameters.SourceBlobContainer",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DelimitedText1",
+						"type": "DatasetReference",
+						"parameters": {
+							"Container": {
+								"value": "@pipeline().parameters.SinkContainer",
+								"type": "Expression"
+							}
+						}
+					}
+				]
 			}
 		],
 		"parameters": {

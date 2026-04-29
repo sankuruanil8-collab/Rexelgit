@@ -8,9 +8,6 @@
 		"parameters": {
 			"Container": {
 				"type": "string"
-			},
-			"FileName": {
-				"type": "string"
 			}
 		},
 		"annotations": [],
@@ -18,10 +15,6 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": {
-					"value": "@replace(dataset().FileName, '.xlsx', '.csv')",
-					"type": "Expression"
-				},
 				"fileSystem": {
 					"value": "@dataset().Container",
 					"type": "Expression"
