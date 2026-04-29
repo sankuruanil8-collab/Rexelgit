@@ -33,10 +33,6 @@
 								"Container": {
 									"value": "@pipeline().parameters.SinkContainer",
 									"type": "Expression"
-								},
-								"FileName": {
-									"value": "@pipeline().parameters.FileName1",
-									"type": "Expression"
 								}
 							}
 						}
