@@ -1,5 +1,5 @@
 {
-	"name": "DelimitedText2",
+	"name": "AdlsSinkCsvDS",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureDataLakeStorage1",
@@ -9,6 +9,9 @@
 			"Container": {
 				"type": "string"
 			}
+		},
+		"folder": {
+			"name": "DataFlowDS"
 		},
 		"annotations": [],
 		"type": "DelimitedText",

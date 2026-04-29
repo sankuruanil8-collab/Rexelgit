@@ -23,19 +23,17 @@
 								"Container": {
 									"value": "@pipeline().parameters.SourceContainer",
 									"type": "Expression"
-								},
-								"FileName": {
-									"value": "@pipeline().parameters.FileName1",
-									"type": "Expression"
 								}
 							},
 							"GetFileCSV2": {
 								"Container": {
 									"value": "@pipeline().parameters.SourceContainer",
 									"type": "Expression"
-								},
-								"FileName": {
-									"value": "@pipeline().parameters.FileName2",
+								}
+							},
+							"SilverSink": {
+								"Container": {
+									"value": "@pipeline().parameters.SinkContainer",
 									"type": "Expression"
 								}
 							},

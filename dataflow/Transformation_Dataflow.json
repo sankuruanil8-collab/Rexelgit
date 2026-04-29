@@ -6,14 +6,14 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "DelimitedText1",
+						"referenceName": "AdlsSourceCsvDS",
 						"type": "DatasetReference"
 					},
 					"name": "GetFileCSV1"
 				},
 				{
 					"dataset": {
-						"referenceName": "DelimitedText1",
+						"referenceName": "AdlsSourceCsvDS",
 						"type": "DatasetReference"
 					},
 					"name": "GetFileCSV2"
@@ -22,14 +22,14 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "DelimitedText2",
+						"referenceName": "AdlsSinkCsvDS",
 						"type": "DatasetReference"
 					},
 					"name": "SilverSink"
 				},
 				{
 					"dataset": {
-						"referenceName": "DelimitedText2",
+						"referenceName": "AdlsSinkCsvDS",
 						"type": "DatasetReference"
 					},
 					"name": "SilverSink2"
