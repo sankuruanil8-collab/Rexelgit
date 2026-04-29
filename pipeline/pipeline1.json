@@ -17,7 +17,29 @@
 				"typeProperties": {
 					"dataflow": {
 						"referenceName": "Transformation_Dataflow",
-						"type": "DataFlowReference"
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"GetCSVFiles": {
+								"Container": {
+									"value": "@pipeline().parameters.SourceContainer",
+									"type": "Expression"
+								},
+								"FileName": {
+									"value": "@pipeline().parameters.FileName1",
+									"type": "Expression"
+								}
+							},
+							"SilverSink": {
+								"Container": {
+									"value": "@pipeline().parameters.SinkContainer",
+									"type": "Expression"
+								},
+								"FileName": {
+									"value": "@pipeline().parameters.FileName1",
+									"type": "Expression"
+								}
+							}
+						}
 					},
 					"compute": {
 						"coreCount": 8,
@@ -27,6 +49,20 @@
 				}
 			}
 		],
+		"parameters": {
+			"SourceContainer": {
+				"type": "string",
+				"defaultValue": "bronze"
+			},
+			"SinkContainer": {
+				"type": "string",
+				"defaultValue": "silver"
+			},
+			"FileName1": {
+				"type": "string",
+				"defaultValue": "Products.csv"
+			}
+		},
 		"annotations": []
 	}
 }
