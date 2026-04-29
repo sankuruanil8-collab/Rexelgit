@@ -24,6 +24,7 @@
 					"type": "Expression"
 				}
 			},
+			"range": "",
 			"firstRowAsHeader": true
 		},
 		"schema": []
