@@ -9,7 +9,14 @@
 						"referenceName": "DelimitedText1",
 						"type": "DatasetReference"
 					},
-					"name": "GetCSVFiles"
+					"name": "GetFileCSV1"
+				},
+				{
+					"dataset": {
+						"referenceName": "DelimitedText1",
+						"type": "DatasetReference"
+					},
+					"name": "GetFileCSV2"
 				}
 			],
 			"sinks": [
@@ -19,6 +26,13 @@
 						"type": "DatasetReference"
 					},
 					"name": "SilverSink"
+				},
+				{
+					"dataset": {
+						"referenceName": "DelimitedText2",
+						"type": "DatasetReference"
+					},
+					"name": "SilverSink2"
 				}
 			],
 			"transformations": [],
@@ -26,8 +40,12 @@
 				"source(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
-				"     partitionBy('hash', 1)) ~> GetCSVFiles",
-				"GetCSVFiles sink(allowSchemaDrift: true,",
+				"     partitionBy('hash', 1)) ~> GetFileCSV1",
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     partitionBy('hash', 1)) ~> GetFileCSV2",
+				"GetFileCSV1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     partitionFileNames:['Products.csv'],",
 				"     umask: 0022,",
@@ -35,7 +53,16 @@
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     partitionBy('hash', 1)) ~> SilverSink"
+				"     partitionBy('hash', 1)) ~> SilverSink",
+				"GetFileCSV2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['Sales_2023.csv'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> SilverSink2"
 			]
 		}
 	}

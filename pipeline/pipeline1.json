@@ -19,7 +19,7 @@
 						"referenceName": "Transformation_Dataflow",
 						"type": "DataFlowReference",
 						"datasetParameters": {
-							"GetCSVFiles": {
+							"GetFileCSV1": {
 								"Container": {
 									"value": "@pipeline().parameters.SourceContainer",
 									"type": "Expression"
@@ -29,7 +29,17 @@
 									"type": "Expression"
 								}
 							},
-							"SilverSink": {
+							"GetFileCSV2": {
+								"Container": {
+									"value": "@pipeline().parameters.SourceContainer",
+									"type": "Expression"
+								},
+								"FileName": {
+									"value": "@pipeline().parameters.FileName2",
+									"type": "Expression"
+								}
+							},
+							"SilverSink2": {
 								"Container": {
 									"value": "@pipeline().parameters.SinkContainer",
 									"type": "Expression"
@@ -57,6 +67,10 @@
 			"FileName1": {
 				"type": "string",
 				"defaultValue": "Products.csv"
+			},
+			"FileName2": {
+				"type": "String",
+				"defaultValue": "Sales_2023.csv"
 			}
 		},
 		"annotations": []
