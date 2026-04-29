@@ -89,8 +89,6 @@
 					{
 						"name": "CopyMysqltoBroze",
 						"type": "Copy",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.00:15:00",
@@ -139,7 +137,7 @@
 						],
 						"outputs": [
 							{
-								"referenceName": "AdlsSinkBronzeDS",
+								"referenceName": "SinkAdlsBronzeDS",
 								"type": "DatasetReference",
 								"parameters": {
 									"Container": {
@@ -198,7 +196,7 @@
 						},
 						"inputs": [
 							{
-								"referenceName": "AdlsSinkBronzeDS",
+								"referenceName": "SinkAdlsBronzeDS",
 								"type": "DatasetReference",
 								"parameters": {
 									"Container": {
@@ -210,7 +208,7 @@
 						],
 						"outputs": [
 							{
-								"referenceName": "AdlsSinkBronzeDS",
+								"referenceName": "SinkAdlsBronzeDS",
 								"type": "DatasetReference",
 								"parameters": {
 									"Container": {
@@ -239,7 +237,8 @@
 							"source": {
 								"type": "CosmosDbSqlApiSource",
 								"query": "select * from rexelcosmoscontainer",
-								"preferredRegions": []
+								"preferredRegions": [],
+								"detectDatetime": true
 							},
 							"sink": {
 								"type": "DelimitedTextSink",
@@ -249,7 +248,7 @@
 								"formatSettings": {
 									"type": "DelimitedTextWriteSettings",
 									"quoteAllText": true,
-									"fileExtension": ".txt"
+									"fileExtension": ""
 								}
 							},
 							"enableStaging": false
@@ -263,11 +262,11 @@
 						],
 						"outputs": [
 							{
-								"referenceName": "AdlsSinkBronzeDS",
+								"referenceName": "SinkAdlsBronzeDS",
 								"type": "DatasetReference",
 								"parameters": {
 									"Container": {
-										"value": "@pipeline().parameters.sinkcontainer",
+										"value": "@pipeline().parameters.SinkContainer",
 										"type": "Expression"
 									}
 								}
@@ -288,41 +287,31 @@
 						"userProperties": [],
 						"typeProperties": {
 							"source": {
-								"type": "ExcelSource",
+								"type": "BinarySource",
 								"storeSettings": {
 									"type": "AzureBlobStorageReadSettings",
 									"recursive": true,
-									"wildcardFileName": "*",
-									"enablePartitionDiscovery": false
+									"wildcardFileName": "*"
+								},
+								"formatSettings": {
+									"type": "BinaryReadSettings"
 								}
 							},
 							"sink": {
-								"type": "DelimitedTextSink",
+								"type": "BinarySink",
 								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ""
+									"type": "AzureBlobFSWriteSettings",
+									"copyBehavior": "PreserveHierarchy"
 								}
 							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
+							"enableStaging": false
 						},
 						"inputs": [
 							{
-								"referenceName": "SourceBlobExcelDS",
+								"referenceName": "SourceBlobBinaryDS",
 								"type": "DatasetReference",
 								"parameters": {
-									"ContainerName": {
+									"Container": {
 										"value": "@pipeline().parameters.SourceBlobContainer",
 										"type": "Expression"
 									}
@@ -331,7 +320,7 @@
 						],
 						"outputs": [
 							{
-								"referenceName": "AdlsSinkBronzeDS",
+								"referenceName": "SinkAdlsBinaryDS",
 								"type": "DatasetReference",
 								"parameters": {
 									"Container": {
@@ -416,13 +405,14 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SourceMySqlDS')]",
-				"[concat(variables('factoryId'), '/datasets/AdlsSinkBronzeDS')]",
+				"[concat(variables('factoryId'), '/datasets/SinkAdlsBronzeDS')]",
 				"[concat(variables('factoryId'), '/datasets/SourceCosmosDS')]",
-				"[concat(variables('factoryId'), '/datasets/SourceBlobExcelDS')]"
+				"[concat(variables('factoryId'), '/datasets/SourceBlobBinaryDS')]",
+				"[concat(variables('factoryId'), '/datasets/SinkAdlsBinaryDS')]"
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/AdlsSinkBronzeDS')]",
+			"name": "[concat(parameters('factoryName'), '/SinkAdlsBronzeDS')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -477,38 +467,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/SourceBlobExcelDS')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureBlobStorage1",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"ContainerName": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "Excel",
-				"typeProperties": {
-					"sheetName": "Sheet1",
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"container": {
-							"value": "@dataset().ContainerName",
-							"type": "Expression"
-						}
-					}
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
 			]
 		},
 		{
@@ -782,6 +740,66 @@
 				"typeProperties": {}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SinkAdlsBinaryDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Container": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": {
+							"value": "@dataset().Container",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SourceBlobBinaryDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Container": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": {
+							"value": "@dataset().Container",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
+			]
 		}
 	]
 }
