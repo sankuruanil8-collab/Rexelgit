@@ -5,8 +5,6 @@
 			{
 				"name": "CopyMysqltoBroze",
 				"type": "Copy",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.00:15:00",
@@ -55,7 +53,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "AdlsSinkBronzeDS",
+						"referenceName": "SinkAdlsBronzeDS",
 						"type": "DatasetReference",
 						"parameters": {
 							"Container": {
@@ -114,7 +112,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "AdlsSinkBronzeDS",
+						"referenceName": "SinkAdlsBronzeDS",
 						"type": "DatasetReference",
 						"parameters": {
 							"Container": {
@@ -126,7 +124,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "AdlsSinkBronzeDS",
+						"referenceName": "SinkAdlsBronzeDS",
 						"type": "DatasetReference",
 						"parameters": {
 							"Container": {
@@ -155,7 +153,8 @@
 					"source": {
 						"type": "CosmosDbSqlApiSource",
 						"query": "select * from rexelcosmoscontainer",
-						"preferredRegions": []
+						"preferredRegions": [],
+						"detectDatetime": true
 					},
 					"sink": {
 						"type": "DelimitedTextSink",
@@ -165,7 +164,7 @@
 						"formatSettings": {
 							"type": "DelimitedTextWriteSettings",
 							"quoteAllText": true,
-							"fileExtension": ".txt"
+							"fileExtension": ""
 						}
 					},
 					"enableStaging": false
@@ -178,11 +177,11 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "AdlsSinkBronzeDS",
+						"referenceName": "SinkAdlsBronzeDS",
 						"type": "DatasetReference",
 						"parameters": {
 							"Container": {
-								"value": "@pipeline().parameters.sinkcontainer",
+								"value": "@pipeline().parameters.SinkContainer",
 								"type": "Expression"
 							}
 						}
@@ -203,41 +202,31 @@
 				"userProperties": [],
 				"typeProperties": {
 					"source": {
-						"type": "ExcelSource",
+						"type": "BinarySource",
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
-							"wildcardFileName": "*",
-							"enablePartitionDiscovery": false
+							"wildcardFileName": "*"
+						},
+						"formatSettings": {
+							"type": "BinaryReadSettings"
 						}
 					},
 					"sink": {
-						"type": "DelimitedTextSink",
+						"type": "BinarySink",
 						"storeSettings": {
-							"type": "AzureBlobFSWriteSettings"
-						},
-						"formatSettings": {
-							"type": "DelimitedTextWriteSettings",
-							"quoteAllText": true,
-							"fileExtension": ""
+							"type": "AzureBlobFSWriteSettings",
+							"copyBehavior": "PreserveHierarchy"
 						}
 					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"typeConversion": true,
-						"typeConversionSettings": {
-							"allowDataTruncation": true,
-							"treatBooleanAsNumber": false
-						}
-					}
+					"enableStaging": false
 				},
 				"inputs": [
 					{
-						"referenceName": "SourceBlobExcelDS",
+						"referenceName": "SourceBlobBinaryDS",
 						"type": "DatasetReference",
 						"parameters": {
-							"ContainerName": {
+							"Container": {
 								"value": "@pipeline().parameters.SourceBlobContainer",
 								"type": "Expression"
 							}
@@ -246,7 +235,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "AdlsSinkBronzeDS",
+						"referenceName": "SinkAdlsBinaryDS",
 						"type": "DatasetReference",
 						"parameters": {
 							"Container": {
