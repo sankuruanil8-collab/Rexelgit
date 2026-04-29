@@ -1,5 +1,5 @@
 {
-	"name": "AdlsSinkBronzeDS",
+	"name": "SinkAdlsBronzeDS",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureDataLakeStorage1",
