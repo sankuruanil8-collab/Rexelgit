@@ -15,6 +15,10 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@replace(item().name, '.xlsx', '.csv')",
+					"type": "Expression"
+				},
 				"fileSystem": {
 					"value": "@dataset().Container",
 					"type": "Expression"
