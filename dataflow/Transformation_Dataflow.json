@@ -17,6 +17,13 @@
 						"type": "DatasetReference"
 					},
 					"name": "GetExcelFiles"
+				},
+				{
+					"linkedService": {
+						"referenceName": "AzureDataLakeStorage1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "source1"
 				}
 			],
 			"sinks": [
@@ -52,10 +59,17 @@
 				"     partitionBy('hash', 1)) ~> GetCSVFiles",
 				"source(allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     inferDriftedColumnTypes: true,",
 				"     ignoreNoFilesFound: false,",
 				"     wildcardPaths:['*.xlsx'],",
 				"     partitionBy('hash', 1)) ~> GetExcelFiles",
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'excel',",
+				"     fileSystem: 'bronze',",
+				"     sheetName: 'Sheet1',",
+				"     firstRowAsHeader: true,",
+				"     wildcardPaths:['*.xlsx']) ~> source1",
 				"GetCSVFiles, GetExcelFiles join(ProductID == ERROR_FUNCTION(''),",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
