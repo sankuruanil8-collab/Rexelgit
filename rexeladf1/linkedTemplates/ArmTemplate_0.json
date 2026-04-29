@@ -294,7 +294,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/SinkAdlsBronzeDS')]",
+			"name": "[concat(parameters('factoryName'), '/ADLS_DS')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -493,7 +493,7 @@
 						],
 						"outputs": [
 							{
-								"referenceName": "SinkAdlsBronzeDS",
+								"referenceName": "ADLS_DS",
 								"type": "DatasetReference",
 								"parameters": {
 									"Container": {
@@ -552,7 +552,7 @@
 						},
 						"inputs": [
 							{
-								"referenceName": "SinkAdlsBronzeDS",
+								"referenceName": "ADLS_DS",
 								"type": "DatasetReference",
 								"parameters": {
 									"Container": {
@@ -564,7 +564,7 @@
 						],
 						"outputs": [
 							{
-								"referenceName": "SinkAdlsBronzeDS",
+								"referenceName": "ADLS_DS",
 								"type": "DatasetReference",
 								"parameters": {
 									"Container": {
@@ -618,7 +618,7 @@
 						],
 						"outputs": [
 							{
-								"referenceName": "SinkAdlsBronzeDS",
+								"referenceName": "ADLS_DS",
 								"type": "DatasetReference",
 								"parameters": {
 									"Container": {
@@ -761,7 +761,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SourceMySqlDS')]",
-				"[concat(variables('factoryId'), '/datasets/SinkAdlsBronzeDS')]",
+				"[concat(variables('factoryId'), '/datasets/ADLS_DS')]",
 				"[concat(variables('factoryId'), '/datasets/SourceCosmosDS')]",
 				"[concat(variables('factoryId'), '/datasets/SourceBlobBinaryDS')]",
 				"[concat(variables('factoryId'), '/datasets/SinkAdlsBinaryDS')]"
