@@ -6,12 +6,12 @@
 		"pipelines": [
 			{
 				"pipelineReference": {
-					"referenceName": "ETL-Pipeline",
+					"referenceName": "Extract-Pipeline",
 					"type": "PipelineReference"
 				},
 				"parameters": {
 					"SourceAdlsContainer": "rawinput",
-					"SinkContainer": "bronze",
+					"SinkAdlsContainerBronze": "bronze",
 					"SourceTableName": "employees"
 				}
 			}
