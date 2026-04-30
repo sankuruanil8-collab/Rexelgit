@@ -74,6 +74,12 @@
 				},
 				{
 					"name": "SelectColumns"
+				},
+				{
+					"name": "FilterSaleID"
+				},
+				{
+					"name": "PartitionByWindow"
 				}
 			],
 			"scriptLines": [
@@ -185,7 +191,12 @@
 				"     partitionBy('hash', 1),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> SelectColumns",
-				"SelectColumns sink(allowSchemaDrift: true,",
+				"PartitionByWindow filter(!isNull(SaleID) && rn == 1,",
+				"     partitionBy('hash', 1)) ~> FilterSaleID",
+				"SelectColumns window(over(SaleID),",
+				"     asc(Date, true),",
+				"     rn = rowNumber()) ~> PartitionByWindow",
+				"FilterSaleID sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     partitionFileNames:['FinalTransformedFile.csv'],",
 				"     umask: 0022,",
