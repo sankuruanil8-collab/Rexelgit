@@ -44,13 +44,13 @@
 		"rexelcosmosdb_properties_typeProperties_connectionString_secretName": {
 			"value": "cosmosdbsecretnew"
 		},
-		"ETL-Trigger_properties_ETL-Pipeline_parameters_SourceContainer": {
+		"ETL-Trigger_properties_Extract-Pipeline_parameters_SourceAdlsContainer": {
 			"value": "rawinput"
 		},
-		"ETL-Trigger_properties_ETL-Pipeline_parameters_SinkContainer": {
+		"ETL-Trigger_properties_Extract-Pipeline_parameters_SinkAdlsContainerBronze": {
 			"value": "bronze"
 		},
-		"ETL-Trigger_properties_ETL-Pipeline_parameters_SourceTableName": {
+		"ETL-Trigger_properties_Extract-Pipeline_parameters_SourceTableName": {
 			"value": "employees"
 		},
 		"EventTriggerBlobtoADLS1_properties_typeProperties_scope": {

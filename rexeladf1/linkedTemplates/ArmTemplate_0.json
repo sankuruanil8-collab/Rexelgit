@@ -63,15 +63,15 @@
 			"type": "string",
 			"defaultValue": "cosmosdbsecretnew"
 		},
-		"ETL-Trigger_properties_ETL-Pipeline_parameters_SourceContainer": {
+		"ETL-Trigger_properties_Extract-Pipeline_parameters_SourceAdlsContainer": {
 			"type": "string",
 			"defaultValue": "rawinput"
 		},
-		"ETL-Trigger_properties_ETL-Pipeline_parameters_SinkContainer": {
+		"ETL-Trigger_properties_Extract-Pipeline_parameters_SinkAdlsContainerBronze": {
 			"type": "string",
 			"defaultValue": "bronze"
 		},
-		"ETL-Trigger_properties_ETL-Pipeline_parameters_SourceTableName": {
+		"ETL-Trigger_properties_Extract-Pipeline_parameters_SourceTableName": {
 			"type": "string",
 			"defaultValue": "employees"
 		}
@@ -165,7 +165,13 @@
 				"annotations": [],
 				"type": "AzureSqlTable",
 				"schema": [],
-				"typeProperties": {}
+				"typeProperties": {
+					"schema": "dbo",
+					"table": {
+						"value": "@dataset().TableName",
+						"type": "Expression"
+					}
+				}
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
@@ -294,7 +300,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ADLS_DS')]",
+			"name": "[concat(parameters('factoryName'), '/AdlsSinkSilverDSDF')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -306,6 +312,9 @@
 					"Container": {
 						"type": "string"
 					}
+				},
+				"folder": {
+					"name": "DataFlowDS"
 				},
 				"annotations": [],
 				"type": "DelimitedText",
@@ -326,6 +335,84 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AdlsSourceBronzeDSDF')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Container": {
+						"type": "string"
+					},
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "DataFlowDS"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().Container",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SourceBlobExcelDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Container": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Excel",
+				"typeProperties": {
+					"sheetName": "Sheet1",
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": {
+							"value": "@dataset().Container",
+							"type": "Expression"
+						}
+					},
+					"firstRowAsHeader": true
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
 			]
 		},
 		{
@@ -377,7 +464,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/SinkAdlsBinaryDS')]",
+			"name": "[concat(parameters('factoryName'), '/SourcenSinkADLS_CSV_DS')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -391,7 +478,7 @@
 					}
 				},
 				"annotations": [],
-				"type": "Binary",
+				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
@@ -399,45 +486,20 @@
 							"value": "@dataset().Container",
 							"type": "Expression"
 						}
-					}
-				}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage1')]"
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/SourceBlobBinaryDS')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureBlobStorage1",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"Container": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "Binary",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"container": {
-							"value": "@dataset().Container",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ETL-Pipeline')]",
+			"name": "[concat(parameters('factoryName'), '/Extract-Pipeline')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -466,7 +528,7 @@
 								"formatSettings": {
 									"type": "DelimitedTextWriteSettings",
 									"quoteAllText": true,
-									"fileExtension": ".csv"
+									"fileExtension": ".txt"
 								}
 							},
 							"enableStaging": false,
@@ -493,11 +555,11 @@
 						],
 						"outputs": [
 							{
-								"referenceName": "ADLS_DS",
+								"referenceName": "SourcenSinkADLS_CSV_DS",
 								"type": "DatasetReference",
 								"parameters": {
 									"Container": {
-										"value": "@pipeline().parameters.SinkContainer",
+										"value": "@pipeline().parameters.SinkAdlsContainerBronze",
 										"type": "Expression"
 									}
 								}
@@ -552,11 +614,11 @@
 						},
 						"inputs": [
 							{
-								"referenceName": "ADLS_DS",
+								"referenceName": "SourcenSinkADLS_CSV_DS",
 								"type": "DatasetReference",
 								"parameters": {
 									"Container": {
-										"value": "@pipeline().parameters.SourceContainer",
+										"value": "@pipeline().parameters.SourceAdlsContainer",
 										"type": "Expression"
 									}
 								}
@@ -564,11 +626,11 @@
 						],
 						"outputs": [
 							{
-								"referenceName": "ADLS_DS",
+								"referenceName": "SourcenSinkADLS_CSV_DS",
 								"type": "DatasetReference",
 								"parameters": {
 									"Container": {
-										"value": "@pipeline().parameters.SinkContainer",
+										"value": "@pipeline().parameters.SinkAdlsContainerBronze",
 										"type": "Expression"
 									}
 								}
@@ -618,69 +680,11 @@
 						],
 						"outputs": [
 							{
-								"referenceName": "ADLS_DS",
+								"referenceName": "SourcenSinkADLS_CSV_DS",
 								"type": "DatasetReference",
 								"parameters": {
 									"Container": {
-										"value": "@pipeline().parameters.SinkContainer",
-										"type": "Expression"
-									}
-								}
-							}
-						]
-					},
-					{
-						"name": "CopyBlobtoBronze",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.00:15:00",
-							"retry": 2,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "BinarySource",
-								"storeSettings": {
-									"type": "AzureBlobStorageReadSettings",
-									"recursive": true,
-									"wildcardFileName": "*"
-								},
-								"formatSettings": {
-									"type": "BinaryReadSettings"
-								}
-							},
-							"sink": {
-								"type": "BinarySink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings",
-									"copyBehavior": "PreserveHierarchy"
-								}
-							},
-							"enableStaging": false
-						},
-						"inputs": [
-							{
-								"referenceName": "SourceBlobBinaryDS",
-								"type": "DatasetReference",
-								"parameters": {
-									"Container": {
-										"value": "@pipeline().parameters.SourceBlobContainer",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "SinkAdlsBinaryDS",
-								"type": "DatasetReference",
-								"parameters": {
-									"Container": {
-										"value": "@pipeline().parameters.SinkContainer",
+										"value": "@pipeline().parameters.SinkAdlsContainerBronze",
 										"type": "Expression"
 									}
 								}
@@ -706,13 +710,13 @@
 								]
 							},
 							{
-								"activity": "CopyBlobtoBronze",
+								"activity": "CopyCosmostoBronze",
 								"dependencyConditions": [
 									"Succeeded"
 								]
 							},
 							{
-								"activity": "CopyCosmostoBronze",
+								"activity": "CopyBlobtoBronze",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -734,17 +738,86 @@
 							},
 							"traceLevel": "Fine"
 						}
+					},
+					{
+						"name": "CopyBlobtoBronze",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ExcelSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*",
+									"enablePartitionDiscovery": false
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings",
+									"copyBehavior": "FlattenHierarchy"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SourceBlobExcelDS",
+								"type": "DatasetReference",
+								"parameters": {
+									"Container": {
+										"value": "@pipeline().parameters.SourceBlobContainer",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "SourcenSinkADLS_CSV_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"Container": {
+										"value": "@pipeline().parameters.SinkAdlsContainerBronze",
+										"type": "Expression"
+									}
+								}
+							}
+						]
 					}
 				],
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
 				"parameters": {
-					"SourceContainer": {
+					"SourceAdlsContainer": {
 						"type": "string",
 						"defaultValue": "rawinput"
 					},
-					"SinkContainer": {
+					"SinkAdlsContainerBronze": {
 						"type": "string",
 						"defaultValue": "bronze"
 					},
@@ -761,10 +834,706 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SourceMySqlDS')]",
-				"[concat(variables('factoryId'), '/datasets/ADLS_DS')]",
+				"[concat(variables('factoryId'), '/datasets/SourcenSinkADLS_CSV_DS')]",
 				"[concat(variables('factoryId'), '/datasets/SourceCosmosDS')]",
-				"[concat(variables('factoryId'), '/datasets/SourceBlobBinaryDS')]",
-				"[concat(variables('factoryId'), '/datasets/SinkAdlsBinaryDS')]"
+				"[concat(variables('factoryId'), '/datasets/SourceBlobExcelDS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Transformation_Dataflow')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "AdlsSourceBronzeDSDF",
+								"type": "DatasetReference"
+							},
+							"name": "Sales"
+						},
+						{
+							"dataset": {
+								"referenceName": "AdlsSourceBronzeDSDF",
+								"type": "DatasetReference"
+							},
+							"name": "Product"
+						},
+						{
+							"dataset": {
+								"referenceName": "AdlsSourceBronzeDSDF",
+								"type": "DatasetReference"
+							},
+							"name": "Category"
+						},
+						{
+							"dataset": {
+								"referenceName": "AdlsSourceBronzeDSDF",
+								"type": "DatasetReference"
+							},
+							"name": "Geography"
+						},
+						{
+							"dataset": {
+								"referenceName": "AdlsSourceBronzeDSDF",
+								"type": "DatasetReference"
+							},
+							"name": "SalesRep"
+						},
+						{
+							"dataset": {
+								"referenceName": "AdlsSourceBronzeDSDF",
+								"type": "DatasetReference"
+							},
+							"name": "SubCategory"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "AdlsSinkSilverDSDF",
+								"type": "DatasetReference"
+							},
+							"name": "SilverSink"
+						}
+					],
+					"transformations": [
+						{
+							"name": "Join1"
+						},
+						{
+							"name": "join2"
+						},
+						{
+							"name": "join3"
+						},
+						{
+							"name": "join4"
+						},
+						{
+							"name": "join5"
+						},
+						{
+							"name": "SelectColumns"
+						},
+						{
+							"name": "FilterSaleID"
+						},
+						{
+							"name": "PartitionByWindow"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          SaleID as integer,",
+						"          Date as date,",
+						"          ProductID as integer,",
+						"          CategoryID as integer,",
+						"          SubCategoryID as integer,",
+						"          SalesRepID as integer,",
+						"          GeographyID as integer,",
+						"          Amount as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     partitionBy('hash', 1)) ~> Sales",
+						"source(output(",
+						"          ProductID as integer,",
+						"          ProductName as string,",
+						"          CategoryID as integer,",
+						"          SubCategoryID as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     partitionBy('hash', 1)) ~> Product",
+						"source(output(",
+						"          CategoryID as integer,",
+						"          CategoryName as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     partitionBy('hash', 1)) ~> Category",
+						"source(output(",
+						"          GeographyID as integer,",
+						"          Country as string,",
+						"          Region as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     partitionBy('hash', 1)) ~> Geography",
+						"source(output(",
+						"          SalesRepID as integer,",
+						"          SalesRepName as string,",
+						"          Region as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     partitionBy('hash', 1)) ~> SalesRep",
+						"source(output(",
+						"          SubCategoryID as integer,",
+						"          SubCategoryName as string,",
+						"          CategoryID as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     partitionBy('hash', 1)) ~> SubCategory",
+						"Sales, Product join(Sales@ProductID == Product@ProductID,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     partitionBy('hash', 1),",
+						"     broadcast: 'auto')~> Join1",
+						"Join1, Category join(Sales@CategoryID == Category@CategoryID,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     partitionBy('hash', 1),",
+						"     broadcast: 'auto')~> join2",
+						"join2, Geography join(Sales@GeographyID == Geography@GeographyID,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     partitionBy('hash', 1),",
+						"     broadcast: 'auto')~> join3",
+						"join3, SalesRep join(Sales@SalesRepID == SalesRep@SalesRepID,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     partitionBy('hash', 1),",
+						"     broadcast: 'auto')~> join4",
+						"join4, SubCategory join(Sales@SubCategoryID == SubCategory@SubCategoryID,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     partitionBy('hash', 1),",
+						"     broadcast: 'auto')~> join5",
+						"join5 select(mapColumn(",
+						"          SaleID,",
+						"          ProductID = Sales@ProductID,",
+						"          ProductName,",
+						"          CategoryID = Sales@CategoryID,",
+						"          CategoryName,",
+						"          SubCategoryID = Sales@SubCategoryID,",
+						"          SubCategoryName,",
+						"          GeographyID = Sales@GeographyID,",
+						"          Region = Geography@Region,",
+						"          Country,",
+						"          SalesRepID = Sales@SalesRepID,",
+						"          SalesRepName,",
+						"          Amount,",
+						"          Date",
+						"     ),",
+						"     partitionBy('hash', 1),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> SelectColumns",
+						"PartitionByWindow filter(!isNull(SaleID) && rn == 1,",
+						"     partitionBy('hash', 1)) ~> FilterSaleID",
+						"SelectColumns window(over(SaleID),",
+						"     asc(Date, true),",
+						"     rn = rowNumber()) ~> PartitionByWindow",
+						"FilterSaleID sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     partitionFileNames:['FinalTransformedFile.csv'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> SilverSink"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/AdlsSourceBronzeDSDF')]",
+				"[concat(variables('factoryId'), '/datasets/AdlsSinkSilverDSDF')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Transform-Load-Pipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "BronzeToSilverDataFlow",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.00:15:00",
+							"retry": 1,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "Transformation_Dataflow",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"Sales": {
+										"Container": {
+											"value": "@pipeline().parameters.SourceContainer",
+											"type": "Expression"
+										},
+										"FileName": {
+											"value": "@pipeline().parameters.FileName1",
+											"type": "Expression"
+										}
+									},
+									"Product": {
+										"Container": {
+											"value": "@pipeline().parameters.SourceContainer",
+											"type": "Expression"
+										},
+										"FileName": {
+											"value": "@pipeline().parameters.FileName2",
+											"type": "Expression"
+										}
+									},
+									"Category": {
+										"Container": {
+											"value": "@pipeline().parameters.SourceContainer",
+											"type": "Expression"
+										},
+										"FileName": {
+											"value": "@pipeline().parameters.FileName3",
+											"type": "Expression"
+										}
+									},
+									"Geography": {
+										"Container": {
+											"value": "@pipeline().parameters.SourceContainer",
+											"type": "Expression"
+										},
+										"FileName": {
+											"value": "@pipeline().parameters.FileName4",
+											"type": "Expression"
+										}
+									},
+									"SalesRep": {
+										"Container": {
+											"value": "@pipeline().parameters.SourceContainer",
+											"type": "Expression"
+										},
+										"FileName": {
+											"value": "@pipeline().parameters.FileName5",
+											"type": "Expression"
+										}
+									},
+									"SubCategory": {
+										"Container": {
+											"value": "@pipeline().parameters.SourceContainer",
+											"type": "Expression"
+										},
+										"FileName": {
+											"value": "@pipeline().parameters.FileName6",
+											"type": "Expression"
+										}
+									},
+									"SilverSink": {
+										"Container": {
+											"value": "@pipeline().parameters.SinkContainer",
+											"type": "Expression"
+										}
+									}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "CopySilverToGold",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "BronzeToSilverDataFlow",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:15:00",
+							"retry": 1,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "FinalTransformedFile.csv",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "SaleID",
+											"type": "Int32",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "SaleID",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "ProductID",
+											"type": "Int32",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "ProductID",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "ProductName",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "ProductName",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "CategoryID",
+											"type": "Int32",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "CategoryID",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "CategoryName",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "CategoryName",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "SubCategoryID",
+											"type": "Int32",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "SubCategoryID",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "SubCategoryName",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "SubCategoryName",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "GeographyID",
+											"type": "Int32",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "GeographyID",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Region",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Region",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Country",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Country",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "SalesRepID",
+											"type": "Int32",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "SalesRepID",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "SalesRepName",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "SalesRepName",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Amount",
+											"type": "Int32",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Amount",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Date",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Date",
+											"type": "String",
+											"physicalType": "String"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SourcenSinkADLS_CSV_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"Container": {
+										"value": "@pipeline().parameters.SilverContainer",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "SourcenSinkADLS_CSV_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"Container": {
+										"value": "@pipeline().parameters.GoldContainer",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "CopyGoldToSQLDB",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "CopySilverToGold",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:15:00",
+							"retry": 1,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "FinalTransformedFile.csv",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": "Truncate Table Final_Sales_Data;",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SourcenSinkADLS_CSV_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"Container": {
+										"value": "@pipeline().parameters.GoldContainer",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "AzureSqlSinkDS",
+								"type": "DatasetReference",
+								"parameters": {
+									"TableName": {
+										"value": "@pipeline().parameters.SinkTableName",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"SourceContainer": {
+						"type": "string",
+						"defaultValue": "bronze"
+					},
+					"SinkContainer": {
+						"type": "string",
+						"defaultValue": "silver"
+					},
+					"FileName1": {
+						"type": "string",
+						"defaultValue": "Sales_2023.csv"
+					},
+					"FileName2": {
+						"type": "String",
+						"defaultValue": "Products.csv"
+					},
+					"FileName3": {
+						"type": "string",
+						"defaultValue": "data_135ac180-99cc-4000-ba39-49d0ad52ff0f_4de9dcb7-997e-4e95-8a87-a2a2835b91f9.csv"
+					},
+					"FileName4": {
+						"type": "string",
+						"defaultValue": "data_135ac180-99cc-4000-ba39-49d0ad52ff0f_09099f2f-12ce-47d6-9f9e-b299d119cb4e.csv"
+					},
+					"FileName5": {
+						"type": "string",
+						"defaultValue": "data_135ac180-99cc-4000-ba39-49d0ad52ff0f_8dfff9dc-8ba0-47a3-8628-e9c36fb1ff51.csv"
+					},
+					"FileName6": {
+						"type": "string",
+						"defaultValue": "data_135ac180-99cc-4000-ba39-49d0ad52ff0f_cc464ea8-fbd6-4563-8a03-ceb5009c926c.csv"
+					},
+					"SilverContainer": {
+						"type": "string",
+						"defaultValue": "silver"
+					},
+					"GoldContainer": {
+						"type": "string",
+						"defaultValue": "gold"
+					},
+					"SinkTableName": {
+						"type": "string",
+						"defaultValue": "Final_Sales_Data"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/Transformation_Dataflow')]",
+				"[concat(variables('factoryId'), '/datasets/SourcenSinkADLS_CSV_DS')]",
+				"[concat(variables('factoryId'), '/datasets/AzureSqlSinkDS')]"
 			]
 		},
 		{
@@ -777,13 +1546,13 @@
 				"pipelines": [
 					{
 						"pipelineReference": {
-							"referenceName": "ETL-Pipeline",
+							"referenceName": "Extract-Pipeline",
 							"type": "PipelineReference"
 						},
 						"parameters": {
-							"SourceContainer": "[parameters('ETL-Trigger_properties_ETL-Pipeline_parameters_SourceContainer')]",
-							"SinkContainer": "[parameters('ETL-Trigger_properties_ETL-Pipeline_parameters_SinkContainer')]",
-							"SourceTableName": "[parameters('ETL-Trigger_properties_ETL-Pipeline_parameters_SourceTableName')]"
+							"SourceAdlsContainer": "[parameters('ETL-Trigger_properties_Extract-Pipeline_parameters_SourceAdlsContainer')]",
+							"SinkAdlsContainerBronze": "[parameters('ETL-Trigger_properties_Extract-Pipeline_parameters_SinkAdlsContainerBronze')]",
+							"SourceTableName": "[parameters('ETL-Trigger_properties_Extract-Pipeline_parameters_SourceTableName')]"
 						}
 					}
 				],
@@ -798,7 +1567,7 @@
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/ETL-Pipeline')]"
+				"[concat(variables('factoryId'), '/pipelines/Extract-Pipeline')]"
 			]
 		}
 	]

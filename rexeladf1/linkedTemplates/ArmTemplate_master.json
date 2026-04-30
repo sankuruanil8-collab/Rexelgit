@@ -59,15 +59,15 @@
 			"type": "string",
 			"defaultValue": "cosmosdbsecretnew"
 		},
-		"ETL-Trigger_properties_ETL-Pipeline_parameters_SourceContainer": {
+		"ETL-Trigger_properties_Extract-Pipeline_parameters_SourceAdlsContainer": {
 			"type": "string",
 			"defaultValue": "rawinput"
 		},
-		"ETL-Trigger_properties_ETL-Pipeline_parameters_SinkContainer": {
+		"ETL-Trigger_properties_Extract-Pipeline_parameters_SinkAdlsContainerBronze": {
 			"type": "string",
 			"defaultValue": "bronze"
 		},
-		"ETL-Trigger_properties_ETL-Pipeline_parameters_SourceTableName": {
+		"ETL-Trigger_properties_Extract-Pipeline_parameters_SourceTableName": {
 			"type": "string",
 			"defaultValue": "employees"
 		},
@@ -144,14 +144,14 @@
 					"rexelcosmosdb_properties_typeProperties_connectionString_secretName": {
 						"value": "[parameters('rexelcosmosdb_properties_typeProperties_connectionString_secretName')]"
 					},
-					"ETL-Trigger_properties_ETL-Pipeline_parameters_SourceContainer": {
-						"value": "[parameters('ETL-Trigger_properties_ETL-Pipeline_parameters_SourceContainer')]"
+					"ETL-Trigger_properties_Extract-Pipeline_parameters_SourceAdlsContainer": {
+						"value": "[parameters('ETL-Trigger_properties_Extract-Pipeline_parameters_SourceAdlsContainer')]"
 					},
-					"ETL-Trigger_properties_ETL-Pipeline_parameters_SinkContainer": {
-						"value": "[parameters('ETL-Trigger_properties_ETL-Pipeline_parameters_SinkContainer')]"
+					"ETL-Trigger_properties_Extract-Pipeline_parameters_SinkAdlsContainerBronze": {
+						"value": "[parameters('ETL-Trigger_properties_Extract-Pipeline_parameters_SinkAdlsContainerBronze')]"
 					},
-					"ETL-Trigger_properties_ETL-Pipeline_parameters_SourceTableName": {
-						"value": "[parameters('ETL-Trigger_properties_ETL-Pipeline_parameters_SourceTableName')]"
+					"ETL-Trigger_properties_Extract-Pipeline_parameters_SourceTableName": {
+						"value": "[parameters('ETL-Trigger_properties_Extract-Pipeline_parameters_SourceTableName')]"
 					}
 				}
 			},
