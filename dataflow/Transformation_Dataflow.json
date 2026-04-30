@@ -26,7 +26,11 @@
 					"name": "Category"
 				},
 				{
-					"name": "source1"
+					"dataset": {
+						"referenceName": "AdlsSourceBronzeDSDF",
+						"type": "DatasetReference"
+					},
+					"name": "Geography"
 				}
 			],
 			"sinks": [
@@ -76,8 +80,15 @@
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
 				"     partitionBy('hash', 1)) ~> Category",
-				"source(allowSchemaDrift: true,",
-				"     validateSchema: false) ~> source1",
+				"source(output(",
+				"          GeographyID as integer,",
+				"          Country as string,",
+				"          Region as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     partitionBy('hash', 1)) ~> Geography",
 				"Sales, Product join(Sales@ProductID == Product@ProductID,",
 				"     joinType:'left',",
 				"     matchType:'exact',",

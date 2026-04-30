@@ -45,6 +45,16 @@
 									"type": "Expression"
 								},
 								"FileName": {
+									"value": "@pipeline().parameters.FileName3",
+									"type": "Expression"
+								}
+							},
+							"Geography": {
+								"Container": {
+									"value": "@pipeline().parameters.SourceContainer",
+									"type": "Expression"
+								},
+								"FileName": {
 									"value": "@pipeline().parameters.FileName4",
 									"type": "Expression"
 								}
