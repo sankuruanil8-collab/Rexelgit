@@ -57,7 +57,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"Container": {
-								"value": "@pipeline().parameters.SinkContainer",
+								"value": "@pipeline().parameters.SinkAdlsContainerBronze",
 								"type": "Expression"
 							}
 						}
@@ -128,7 +128,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"Container": {
-								"value": "@pipeline().parameters.SinkContainer",
+								"value": "@pipeline().parameters.SinkAdlsContainerBronze",
 								"type": "Expression"
 							}
 						}
@@ -359,11 +359,11 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "DelimitedText1",
+						"referenceName": "SourcenSinkADLS_CSV_DS",
 						"type": "DatasetReference",
 						"parameters": {
 							"Container": {
-								"value": "@pipeline().parameters.SinkContainer",
+								"value": "@pipeline().parameters.SinkAdlsContainerBronze",
 								"type": "Expression"
 							}
 						}
@@ -376,7 +376,7 @@
 				"type": "string",
 				"defaultValue": "rawinput"
 			},
-			"SinkContainer": {
+			"SinkAdlsContainerBronze": {
 				"type": "string",
 				"defaultValue": "bronze"
 			},
