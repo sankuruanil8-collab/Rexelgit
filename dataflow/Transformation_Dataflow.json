@@ -31,6 +31,20 @@
 						"type": "DatasetReference"
 					},
 					"name": "Geography"
+				},
+				{
+					"dataset": {
+						"referenceName": "AdlsSourceBronzeDSDF",
+						"type": "DatasetReference"
+					},
+					"name": "SalesRep"
+				},
+				{
+					"dataset": {
+						"referenceName": "AdlsSourceBronzeDSDF",
+						"type": "DatasetReference"
+					},
+					"name": "SubCategory"
 				}
 			],
 			"sinks": [
@@ -44,7 +58,22 @@
 			],
 			"transformations": [
 				{
-					"name": "JoinT"
+					"name": "Join1"
+				},
+				{
+					"name": "join2"
+				},
+				{
+					"name": "join3"
+				},
+				{
+					"name": "join4"
+				},
+				{
+					"name": "join5"
+				},
+				{
+					"name": "SelectColumns"
 				}
 			],
 			"scriptLines": [
@@ -89,13 +118,71 @@
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
 				"     partitionBy('hash', 1)) ~> Geography",
+				"source(output(",
+				"          SalesRepID as integer,",
+				"          SalesRepName as string,",
+				"          Region as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     partitionBy('hash', 1)) ~> SalesRep",
+				"source(output(",
+				"          SubCategoryID as integer,",
+				"          SubCategoryName as string,",
+				"          CategoryID as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     partitionBy('hash', 1)) ~> SubCategory",
 				"Sales, Product join(Sales@ProductID == Product@ProductID,",
 				"     joinType:'left',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     partitionBy('hash', 1),",
-				"     broadcast: 'auto')~> JoinT",
-				"JoinT sink(allowSchemaDrift: true,",
+				"     broadcast: 'auto')~> Join1",
+				"Join1, Category join(Sales@CategoryID == Category@CategoryID,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     partitionBy('hash', 1),",
+				"     broadcast: 'auto')~> join2",
+				"join2, Geography join(Sales@GeographyID == Geography@GeographyID,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join3",
+				"join3, SalesRep join(Sales@SalesRepID == SalesRep@SalesRepID,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join4",
+				"join4, SubCategory join(Sales@SubCategoryID == SubCategory@SubCategoryID,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join5",
+				"join5 select(mapColumn(",
+				"          SaleID,",
+				"          Date,",
+				"          ProductID = Sales@ProductID,",
+				"          CategoryID = Sales@CategoryID,",
+				"          SubCategoryID = Sales@SubCategoryID,",
+				"          SalesRepID = Sales@SalesRepID,",
+				"          GeographyID = Sales@GeographyID,",
+				"          Amount,",
+				"          ProductName,",
+				"          CategoryName,",
+				"          Country,",
+				"          Region = Geography@Region,",
+				"          SalesRepName,",
+				"          SubCategoryName",
+				"     ),",
+				"     partitionBy('hash', 1),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SelectColumns",
+				"SelectColumns sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     partitionFileNames:['FinalTransformedFile.csv'],",
 				"     umask: 0022,",
