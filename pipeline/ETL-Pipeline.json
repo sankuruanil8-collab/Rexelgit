@@ -181,7 +181,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"Container": {
-								"value": "@pipeline().parameters.SinkContainer",
+								"value": "@pipeline().parameters.SinkAdlsContainerBronze",
 								"type": "Expression"
 							}
 						}
