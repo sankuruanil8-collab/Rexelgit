@@ -9,28 +9,24 @@
 						"referenceName": "AdlsSourceBronzeDSDF",
 						"type": "DatasetReference"
 					},
-					"name": "GetCSVFiles"
+					"name": "Sales"
 				},
 				{
 					"dataset": {
 						"referenceName": "AdlsSourceBronzeDSDF",
 						"type": "DatasetReference"
 					},
+					"name": "Product"
+				},
+				{
+					"dataset": {
+						"referenceName": "AdlsSourceBronzeDSDF",
+						"type": "DatasetReference"
+					},
+					"name": "Category"
+				},
+				{
 					"name": "source1"
-				},
-				{
-					"dataset": {
-						"referenceName": "AdlsSourceBronzeDSDF",
-						"type": "DatasetReference"
-					},
-					"name": "source2"
-				},
-				{
-					"dataset": {
-						"referenceName": "AdlsSourceBronzeDSDF",
-						"type": "DatasetReference"
-					},
-					"name": "source3"
 				}
 			],
 			"sinks": [
@@ -61,7 +57,7 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
-				"     partitionBy('hash', 1)) ~> GetCSVFiles",
+				"     partitionBy('hash', 1)) ~> Sales",
 				"source(output(",
 				"          ProductID as integer,",
 				"          ProductName as string,",
@@ -71,15 +67,18 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
-				"     partitionBy('hash', 1)) ~> source1",
-				"source(allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false) ~> source2",
-				"source(allowSchemaDrift: true,",
+				"     partitionBy('hash', 1)) ~> Product",
+				"source(output(",
+				"          CategoryID as integer,",
+				"          CategoryName as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
-				"     partitionBy('hash', 1)) ~> source3",
-				"GetCSVFiles, source1 join(GetCSVFiles@ProductID == source1@ProductID,",
+				"     partitionBy('hash', 1)) ~> Category",
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false) ~> source1",
+				"Sales, Product join(Sales@ProductID == Product@ProductID,",
 				"     joinType:'left',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
