@@ -189,66 +189,6 @@
 				]
 			},
 			{
-				"name": "CopyBlobtoBronze",
-				"type": "Copy",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "0.00:15:00",
-					"retry": 2,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "BinarySource",
-						"storeSettings": {
-							"type": "AzureBlobStorageReadSettings",
-							"recursive": true,
-							"wildcardFileName": "*"
-						},
-						"formatSettings": {
-							"type": "BinaryReadSettings"
-						}
-					},
-					"sink": {
-						"type": "BinarySink",
-						"storeSettings": {
-							"type": "AzureBlobFSWriteSettings",
-							"copyBehavior": "PreserveHierarchy"
-						}
-					},
-					"enableStaging": false
-				},
-				"inputs": [
-					{
-						"referenceName": "SourceBlobBinaryDS",
-						"type": "DatasetReference",
-						"parameters": {
-							"Container": {
-								"value": "@pipeline().parameters.SourceBlobContainer",
-								"type": "Expression"
-							}
-						}
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "SinkAdlsBinaryDS",
-						"type": "DatasetReference",
-						"parameters": {
-							"Container": {
-								"value": "@pipeline().parameters.SinkAdlsContainerBronze",
-								"type": "Expression"
-							}
-						}
-					}
-				]
-			},
-			{
 				"name": "Data flow1",
 				"type": "ExecuteDataFlow",
 				"state": "Inactive",
@@ -267,19 +207,13 @@
 						]
 					},
 					{
-						"activity": "CopyBlobtoBronze",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
 						"activity": "CopyCosmostoBronze",
 						"dependencyConditions": [
 							"Succeeded"
 						]
 					},
 					{
-						"activity": "CopyBlobtoBronzenew",
+						"activity": "CopyBlobtoBronze",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -302,7 +236,7 @@
 				}
 			},
 			{
-				"name": "CopyBlobtoBronzenew",
+				"name": "CopyBlobtoBronze",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
