@@ -5,8 +5,6 @@
 			{
 				"name": "CopyMysqltoBroze",
 				"type": "Copy",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.00:15:00",
@@ -69,8 +67,6 @@
 			{
 				"name": "CopyADLStoBronze",
 				"type": "Copy",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.00:15:00",
@@ -281,6 +277,12 @@
 						"dependencyConditions": [
 							"Succeeded"
 						]
+					},
+					{
+						"activity": "CopyBlobtoBronzenew",
+						"dependencyConditions": [
+							"Succeeded"
+						]
 					}
 				],
 				"policy": {
@@ -300,7 +302,7 @@
 				}
 			},
 			{
-				"name": "Copy data1",
+				"name": "CopyBlobtoBronzenew",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
