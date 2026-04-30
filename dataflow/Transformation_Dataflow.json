@@ -6,30 +6,30 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "AdlsSourceCsvDS",
+						"referenceName": "AdlsSourceBronzeDSDF",
 						"type": "DatasetReference"
 					},
 					"name": "GetCSVFiles"
 				},
 				{
 					"dataset": {
-						"referenceName": "BlobSourceExcelDS",
+						"referenceName": "AdlsSourceBronzeDSDF",
 						"type": "DatasetReference"
 					},
-					"name": "GetExcelFiles"
+					"name": "source1"
 				},
 				{
-					"linkedService": {
-						"referenceName": "AzureDataLakeStorage1",
-						"type": "LinkedServiceReference"
+					"dataset": {
+						"referenceName": "AdlsSourceBronzeDSDF",
+						"type": "DatasetReference"
 					},
-					"name": "source1"
+					"name": "source2"
 				}
 			],
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "AdlsSinkCsvDS",
+						"referenceName": "AdlsSinkSilverDSDF",
 						"type": "DatasetReference"
 					},
 					"name": "SilverSink"
@@ -53,27 +53,26 @@
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     inferDriftedColumnTypes: true,",
 				"     ignoreNoFilesFound: false,",
-				"     wildcardPaths:['*.csv'],",
 				"     partitionBy('hash', 1)) ~> GetCSVFiles",
-				"source(allowSchemaDrift: true,",
+				"source(output(",
+				"          ProductID as integer,",
+				"          ProductName as string,",
+				"          CategoryID as integer,",
+				"          SubCategoryID as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
-				"     wildcardPaths:['*.xlsx'],",
-				"     partitionBy('hash', 1)) ~> GetExcelFiles",
+				"     partitionBy('hash', 1)) ~> source1",
 				"source(allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false,",
-				"     format: 'excel',",
-				"     fileSystem: 'bronze',",
-				"     sheetName: 'Sheet1',",
-				"     firstRowAsHeader: true,",
-				"     wildcardPaths:['*.xlsx']) ~> source1",
-				"GetCSVFiles, GetExcelFiles join(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
-				"     joinType:'inner',",
+				"     ignoreNoFilesFound: false) ~> source2",
+				"GetCSVFiles, source1 join(GetCSVFiles@ProductID == source1@ProductID,",
+				"     joinType:'left',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
+				"     partitionBy('hash', 1),",
 				"     broadcast: 'auto')~> JoinT",
 				"JoinT sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",

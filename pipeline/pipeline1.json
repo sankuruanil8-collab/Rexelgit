@@ -23,11 +23,29 @@
 								"Container": {
 									"value": "@pipeline().parameters.SourceContainer",
 									"type": "Expression"
+								},
+								"FileName": {
+									"value": "@pipeline().parameters.FileName1",
+									"type": "Expression"
 								}
 							},
-							"GetExcelFiles": {
+							"source1": {
 								"Container": {
 									"value": "@pipeline().parameters.SourceContainer",
+									"type": "Expression"
+								},
+								"FileName": {
+									"value": "@pipeline().parameters.FileName2",
+									"type": "Expression"
+								}
+							},
+							"source2": {
+								"Container": {
+									"value": "@pipeline().parameters.SourceContainer",
+									"type": "Expression"
+								},
+								"FileName": {
+									"value": "@pipeline().parameters.FileName3",
 									"type": "Expression"
 								}
 							},
@@ -58,11 +76,15 @@
 			},
 			"FileName1": {
 				"type": "string",
-				"defaultValue": "Products.csv"
+				"defaultValue": "Sales_2023.csv"
 			},
 			"FileName2": {
 				"type": "String",
-				"defaultValue": "Sales_2023.csv"
+				"defaultValue": "Products.csv"
+			},
+			"FileName3": {
+				"type": "string",
+				"defaultValue": "data_135ac180-99cc-4000-ba39-49d0ad52ff0f_09099f2f-12ce-47d6-9f9e-b299d119cb4e.csv"
 			}
 		},
 		"annotations": []
