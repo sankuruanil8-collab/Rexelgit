@@ -1,5 +1,5 @@
 {
-	"name": "pipeline1",
+	"name": "Transform-Load-Pipeline",
 	"properties": {
 		"activities": [
 			{
@@ -59,6 +59,26 @@
 									"type": "Expression"
 								}
 							},
+							"SalesRep": {
+								"Container": {
+									"value": "@pipeline().parameters.SourceContainer",
+									"type": "Expression"
+								},
+								"FileName": {
+									"value": "@pipeline().parameters.FileName5",
+									"type": "Expression"
+								}
+							},
+							"SubCategory": {
+								"Container": {
+									"value": "@pipeline().parameters.SourceContainer",
+									"type": "Expression"
+								},
+								"FileName": {
+									"value": "@pipeline().parameters.FileName6",
+									"type": "Expression"
+								}
+							},
 							"SilverSink": {
 								"Container": {
 									"value": "@pipeline().parameters.SinkContainer",
@@ -99,6 +119,14 @@
 			"FileName4": {
 				"type": "string",
 				"defaultValue": "data_135ac180-99cc-4000-ba39-49d0ad52ff0f_09099f2f-12ce-47d6-9f9e-b299d119cb4e.csv"
+			},
+			"FileName5": {
+				"type": "string",
+				"defaultValue": "data_135ac180-99cc-4000-ba39-49d0ad52ff0f_8dfff9dc-8ba0-47a3-8628-e9c36fb1ff51.csv"
+			},
+			"FileName6": {
+				"type": "string",
+				"defaultValue": "data_135ac180-99cc-4000-ba39-49d0ad52ff0f_cc464ea8-fbd6-4563-8a03-ceb5009c926c.csv"
 			}
 		},
 		"annotations": []
