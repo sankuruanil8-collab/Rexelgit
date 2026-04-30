@@ -1,5 +1,5 @@
 {
-	"name": "ETL-Pipeline",
+	"name": "Extract-Pipeline",
 	"properties": {
 		"activities": [
 			{
