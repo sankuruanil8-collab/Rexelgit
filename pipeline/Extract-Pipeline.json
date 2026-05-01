@@ -138,8 +138,6 @@
 			{
 				"name": "CopyCosmostoBronze",
 				"type": "Copy",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.00:15:00",
@@ -303,6 +301,41 @@
 						}
 					}
 				]
+			},
+			{
+				"name": "Web1",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "CopyCosmostoBronze",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"url": "https://prod-19.northcentralus.logic.azure.com:443/workflows/f2df9c010a4e4c2c90a77a2a6bca46e4/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=Qdm8-Z17dJwhCdLG20zUn8KbpQGuxLvMB3wJtnVnenQ",
+					"body": {
+						"type": "object",
+						"properties": {
+							"adf": {
+								"type": "string"
+							},
+							"pipeline": {
+								"type": "string"
+							}
+						}
+					}
+				}
 			}
 		],
 		"parameters": {
