@@ -39,10 +39,6 @@
 			"type": "string",
 			"defaultValue": "aniladmin"
 		},
-		"CosmosDbNoSql1_properties_typeProperties_connectionString_secretName": {
-			"type": "string",
-			"defaultValue": "cosmosdbsecretnew"
-		},
 		"MySql1_properties_typeProperties_server": {
 			"type": "string",
 			"defaultValue": "rexelmysqlserver1new.mysql.database.azure.com"
@@ -128,9 +124,6 @@
 					},
 					"AzureDataLakeStorage1_properties_typeProperties_url": {
 						"value": "[parameters('AzureDataLakeStorage1_properties_typeProperties_url')]"
-					},
-					"CosmosDbNoSql1_properties_typeProperties_connectionString_secretName": {
-						"value": "[parameters('CosmosDbNoSql1_properties_typeProperties_connectionString_secretName')]"
 					},
 					"MySql1_properties_typeProperties_server": {
 						"value": "[parameters('MySql1_properties_typeProperties_server')]"

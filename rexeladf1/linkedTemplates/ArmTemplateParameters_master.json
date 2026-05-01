@@ -29,9 +29,6 @@
 		"AzureSqlDatabase1_properties_typeProperties_userName": {
 			"value": "aniladmin"
 		},
-		"CosmosDbNoSql1_properties_typeProperties_connectionString_secretName": {
-			"value": "cosmosdbsecretnew"
-		},
 		"MySql1_properties_typeProperties_server": {
 			"value": "rexelmysqlserver1new.mysql.database.azure.com"
 		},

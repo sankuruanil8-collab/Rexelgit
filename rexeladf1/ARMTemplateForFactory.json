@@ -39,10 +39,6 @@
 			"type": "string",
 			"defaultValue": "aniladmin"
 		},
-		"CosmosDbNoSql1_properties_typeProperties_connectionString_secretName": {
-			"type": "string",
-			"defaultValue": "cosmosdbsecretnew"
-		},
 		"MySql1_properties_typeProperties_server": {
 			"type": "string",
 			"defaultValue": "rexelmysqlserver1new.mysql.database.azure.com"
@@ -222,8 +218,6 @@
 					{
 						"name": "CopyCosmostoBronze",
 						"type": "Copy",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.00:15:00",
@@ -389,6 +383,42 @@
 								}
 							}
 						]
+					},
+					{
+						"name": "Web1",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "CopyCosmostoBronze",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"method": "POST",
+							"headers": {},
+							"url": "https://prod-19.northcentralus.logic.azure.com:443/workflows/f2df9c010a4e4c2c90a77a2a6bca46e4/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=Qdm8-Z17dJwhCdLG20zUn8KbpQGuxLvMB3wJtnVnenQ",
+							"body": {
+								"type": "object",
+								"properties": {
+									"adf": {
+										"type": "string"
+									},
+									"pipeline": {
+										"type": "string"
+									}
+								}
+							}
+						}
 					}
 				],
 				"policy": {
@@ -1210,29 +1240,6 @@
 				}
 			},
 			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/CosmosDbNoSql1')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "CosmosDb",
-				"typeProperties": {
-					"connectionString": {
-						"type": "AzureKeyVaultSecret",
-						"store": {
-							"referenceName": "AzureKeyVault1",
-							"type": "LinkedServiceReference"
-						},
-						"secretName": "[parameters('CosmosDbNoSql1_properties_typeProperties_connectionString_secretName')]",
-						"secretVersion": "2bb720b528344cf0a1f04b68c53c1c74"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureKeyVault1')]"
-			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/MySql1')]",
