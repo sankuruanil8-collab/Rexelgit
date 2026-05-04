@@ -12,7 +12,9 @@
 				"parameters": {
 					"SourceAdlsContainer": "rawinput",
 					"SinkAdlsContainerBronze": "bronze",
-					"SourceTableName": "employees"
+					"SourceTableName": "employees",
+					"SourceBlobContainer": "input",
+					"LoadType": "Delta"
 				}
 			}
 		],

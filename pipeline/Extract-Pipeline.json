@@ -354,6 +354,10 @@
 			"SourceBlobContainer": {
 				"type": "string",
 				"defaultValue": "input"
+			},
+			"LoadType": {
+				"type": "string",
+				"defaultValue": "Delta"
 			}
 		},
 		"annotations": []
