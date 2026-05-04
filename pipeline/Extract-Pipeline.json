@@ -26,7 +26,10 @@
 						"formatSettings": {
 							"type": "DelimitedTextWriteSettings",
 							"quoteAllText": true,
-							"fileExtension": ".txt"
+							"fileExtension": {
+								"value": "@concat('employees_', formatDateTime(pipeline().parameters.Date, 'yyyy'), formatDateTime(pipeline().parameters.Date, 'MM'), formatDateTime(pipeline().parameters.Date, 'dd'), '.csv')",
+								"type": "Expression"
+							}
 						}
 					},
 					"enableStaging": false,
@@ -336,6 +339,26 @@
 						}
 					}
 				}
+			},
+			{
+				"name": "Stored procedure1",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "CopyMysqltoBroze",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": []
 			}
 		],
 		"parameters": {
@@ -358,6 +381,9 @@
 			"LoadType": {
 				"type": "string",
 				"defaultValue": "Delta"
+			},
+			"Date": {
+				"type": "string"
 			}
 		},
 		"annotations": []
