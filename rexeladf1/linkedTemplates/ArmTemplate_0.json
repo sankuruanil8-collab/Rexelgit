@@ -548,7 +548,14 @@
 					{
 						"name": "CopyCosmostoBronze",
 						"type": "Copy",
-						"dependsOn": [],
+						"dependsOn": [
+							{
+								"activity": "Stored procedure",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
 						"policy": {
 							"timeout": "0.00:15:00",
 							"retry": 0,
@@ -977,12 +984,6 @@
 								]
 							},
 							{
-								"activity": "CopyCosmostoBronze",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							},
-							{
 								"activity": "Incremental Model",
 								"dependencyConditions": [
 									"Succeeded"
@@ -1029,7 +1030,7 @@
 					},
 					"LoadType": {
 						"type": "string",
-						"defaultValue": "Delta"
+						"defaultValue": "Anil"
 					},
 					"Date": {
 						"type": "string"
