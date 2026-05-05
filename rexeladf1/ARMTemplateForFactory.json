@@ -54,22 +54,6 @@
 		"rexelcosmosdb_properties_typeProperties_connectionString_secretName": {
 			"type": "string",
 			"defaultValue": "cosmosdbsecretnew"
-		},
-		"ETL-Trigger_properties_Extract-Pipeline_parameters_SourceAdlsContainer": {
-			"type": "string",
-			"defaultValue": "rawinput"
-		},
-		"ETL-Trigger_properties_Extract-Pipeline_parameters_SinkAdlsContainerBronze": {
-			"type": "string",
-			"defaultValue": "bronze"
-		},
-		"ETL-Trigger_properties_Extract-Pipeline_parameters_SourceTableName": {
-			"type": "string",
-			"defaultValue": "employees"
-		},
-		"EventTriggerBlobtoADLS1_properties_typeProperties_scope": {
-			"type": "string",
-			"defaultValue": "/subscriptions/398fed49-ff5a-4b9d-869b-7f3b9182afb2/resourceGroups/RexelHoldings/providers/Microsoft.Storage/storageAccounts/rexelblob"
 		}
 	},
 	"variables": {
@@ -82,68 +66,6 @@
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
-					{
-						"name": "CopyMysqltoBroze",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.00:15:00",
-							"retry": 2,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "MySqlSource"
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "SourceMySqlDS",
-								"type": "DatasetReference",
-								"parameters": {
-									"MySQLTableName": {
-										"value": "@pipeline().parameters.SourceTableName",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "SourcenSinkADLS_CSV_DS",
-								"type": "DatasetReference",
-								"parameters": {
-									"Container": {
-										"value": "@pipeline().parameters.SinkAdlsContainerBronze",
-										"type": "Expression"
-									}
-								}
-							}
-						]
-					},
 					{
 						"name": "CopyADLStoBronze",
 						"type": "Copy",
@@ -221,7 +143,7 @@
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.00:15:00",
-							"retry": 2,
+							"retry": 0,
 							"retryIntervalInSeconds": 30,
 							"secureOutput": false,
 							"secureInput": false
@@ -268,60 +190,12 @@
 						]
 					},
 					{
-						"name": "Data flow1",
-						"type": "ExecuteDataFlow",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
-						"dependsOn": [
-							{
-								"activity": "CopyADLStoBronze",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							},
-							{
-								"activity": "CopyMysqltoBroze",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							},
-							{
-								"activity": "CopyCosmostoBronze",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							},
-							{
-								"activity": "CopyBlobtoBronze",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					},
-					{
 						"name": "CopyBlobtoBronze",
 						"type": "Copy",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
-							"retry": 0,
+							"retry": 1,
 							"retryIntervalInSeconds": 30,
 							"secureOutput": false,
 							"secureInput": false
@@ -419,6 +293,310 @@
 								}
 							}
 						}
+					},
+					{
+						"name": "Stored procedure",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "Data flow1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:15:00",
+							"retry": 1,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "dbo.Incremental_load",
+							"storedProcedureParameters": {
+								"LoadType": {
+									"value": {
+										"value": "@pipeline().parameters.LoadType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"Pipeline_run_ID": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"Pipeline_trigger_ID": {
+									"value": {
+										"value": "@pipeline().TriggerId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"Pipeline_Trigger_time": {
+									"value": {
+										"value": "@pipeline().TriggerTime",
+										"type": "Expression"
+									},
+									"type": "DateTime"
+								},
+								"PipelineName": {
+									"value": {
+										"value": "@pipeline().Pipeline",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"PipelineTriggerName": {
+									"value": {
+										"value": "@pipeline().TriggerName",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"PipelineTriggerType": {
+									"value": {
+										"value": "@pipeline().TriggerType",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureSqlDatabase1",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Incremental Model",
+						"type": "IfCondition",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(toLower(pipeline().parameters.LoadType), 'full')",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "CopyMySqltoBrozeDelta",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "Last Pipeline Run Date",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.00:15:00",
+										"retry": 1,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "MySqlSource",
+											"query": {
+												"value": "@concat('select * from employees where created_at >= ''',\nactivity('Last Pipeline Run Date').output.firstRow.LastRunDate,\n'''')",
+												"type": "Expression"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ""
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "SourceMySqlDS",
+											"type": "DatasetReference",
+											"parameters": {
+												"MySQLTableName": {
+													"value": "@pipeline().parameters.SourceTableName",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "AdlsSinkBronzeDS",
+											"type": "DatasetReference",
+											"parameters": {
+												"ContainerName": {
+													"value": "@pipeline().parameters.SinkAdlsContainerBronze",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "Last Pipeline Run Date",
+									"type": "Lookup",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.00:15:00",
+										"retry": 1,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": "SELECT max(LastUpdated) AS LastRunDate FROM Pipeline_Log_Table;",
+											"queryTimeout": "00:15:00",
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "AzureSqlSinkDS",
+											"type": "DatasetReference",
+											"parameters": {
+												"TableName": "dbo.Pipeline_Log_Table"
+											}
+										}
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "CopyMySqltoBrozeFull",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.00:15:00",
+										"retry": 1,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "MySqlSource"
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "SourceMySqlDS",
+											"type": "DatasetReference",
+											"parameters": {
+												"MySQLTableName": {
+													"value": "@pipeline().parameters.SourceTableName",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "AdlsSinkBronzeDS",
+											"type": "DatasetReference",
+											"parameters": {
+												"ContainerName": {
+													"value": "@pipeline().parameters.SinkAdlsContainerBronze",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
+						"dependsOn": [
+							{
+								"activity": "CopyADLStoBronze",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "CopyBlobtoBronze",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "CopyCosmostoBronze",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Incremental Model",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
 					}
 				],
 				"policy": {
@@ -440,15 +618,25 @@
 					"SourceBlobContainer": {
 						"type": "string",
 						"defaultValue": "input"
+					},
+					"LoadType": {
+						"type": "string",
+						"defaultValue": "Delta"
+					},
+					"Date": {
+						"type": "string"
 					}
 				},
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/SourceMySqlDS')]",
 				"[concat(variables('factoryId'), '/datasets/SourcenSinkADLS_CSV_DS')]",
 				"[concat(variables('factoryId'), '/datasets/SourceCosmosDS')]",
-				"[concat(variables('factoryId'), '/datasets/SourceBlobExcelDS')]"
+				"[concat(variables('factoryId'), '/datasets/SourceBlobExcelDS')]",
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]",
+				"[concat(variables('factoryId'), '/datasets/SourceMySqlDS')]",
+				"[concat(variables('factoryId'), '/datasets/AdlsSinkBronzeDS')]",
+				"[concat(variables('factoryId'), '/datasets/AzureSqlSinkDS')]"
 			]
 		},
 		{
@@ -1294,63 +1482,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ETL-Trigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "Extract-Pipeline",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"SourceAdlsContainer": "[parameters('ETL-Trigger_properties_Extract-Pipeline_parameters_SourceAdlsContainer')]",
-							"SinkAdlsContainerBronze": "[parameters('ETL-Trigger_properties_Extract-Pipeline_parameters_SinkAdlsContainerBronze')]",
-							"SourceTableName": "[parameters('ETL-Trigger_properties_Extract-Pipeline_parameters_SourceTableName')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2026-04-28T12:00:00",
-						"timeZone": "India Standard Time"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/Extract-Pipeline')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/EventTriggerBlobtoADLS1')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "EventTriggerBlobtoADLS1",
-				"annotations": [],
-				"runtimeState": "Stopped",
-				"pipelines": [],
-				"type": "BlobEventsTrigger",
-				"typeProperties": {
-					"blobPathBeginsWith": "/input/blobs/",
-					"blobPathEndsWith": ".csv",
-					"ignoreEmptyBlobs": true,
-					"scope": "[parameters('EventTriggerBlobtoADLS1_properties_typeProperties_scope')]",
-					"events": [
-						"Microsoft.Storage.BlobCreated",
-						"Microsoft.Storage.BlobDeleted"
-					]
-				}
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/SelfHostedIR')]",
 			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
 			"apiVersion": "2018-06-01",
@@ -1575,6 +1706,42 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/AdlsSourceBronzeDSDF')]",
 				"[concat(variables('factoryId'), '/datasets/AdlsSinkSilverDSDF')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AdlsSinkBronzeDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"ContainerName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "@concat('employees_', formatDateTime(pipeline().parameters.Date, 'yyyy'), formatDateTime(pipeline().parameters.Date, 'MM'), formatDateTime(pipeline().parameters.Date, 'dd'), '.csv')",
+						"fileSystem": {
+							"value": "@dataset().ContainerName",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage1')]"
 			]
 		}
 	]

@@ -55,22 +55,6 @@
 			"type": "string",
 			"defaultValue": "cosmosdbsecretnew"
 		},
-		"ETL-Trigger_properties_Extract-Pipeline_parameters_SourceAdlsContainer": {
-			"type": "string",
-			"defaultValue": "rawinput"
-		},
-		"ETL-Trigger_properties_Extract-Pipeline_parameters_SinkAdlsContainerBronze": {
-			"type": "string",
-			"defaultValue": "bronze"
-		},
-		"ETL-Trigger_properties_Extract-Pipeline_parameters_SourceTableName": {
-			"type": "string",
-			"defaultValue": "employees"
-		},
-		"EventTriggerBlobtoADLS1_properties_typeProperties_scope": {
-			"type": "string",
-			"defaultValue": "/subscriptions/398fed49-ff5a-4b9d-869b-7f3b9182afb2/resourceGroups/RexelHoldings/providers/Microsoft.Storage/storageAccounts/rexelblob"
-		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -116,9 +100,6 @@
 					"AzureSqlDatabase1_properties_typeProperties_userName": {
 						"value": "[parameters('AzureSqlDatabase1_properties_typeProperties_userName')]"
 					},
-					"EventTriggerBlobtoADLS1_properties_typeProperties_scope": {
-						"value": "[parameters('EventTriggerBlobtoADLS1_properties_typeProperties_scope')]"
-					},
 					"AzureBlobStorage1_properties_typeProperties_connectionString_secretName": {
 						"value": "[parameters('AzureBlobStorage1_properties_typeProperties_connectionString_secretName')]"
 					},
@@ -136,15 +117,6 @@
 					},
 					"rexelcosmosdb_properties_typeProperties_connectionString_secretName": {
 						"value": "[parameters('rexelcosmosdb_properties_typeProperties_connectionString_secretName')]"
-					},
-					"ETL-Trigger_properties_Extract-Pipeline_parameters_SourceAdlsContainer": {
-						"value": "[parameters('ETL-Trigger_properties_Extract-Pipeline_parameters_SourceAdlsContainer')]"
-					},
-					"ETL-Trigger_properties_Extract-Pipeline_parameters_SinkAdlsContainerBronze": {
-						"value": "[parameters('ETL-Trigger_properties_Extract-Pipeline_parameters_SinkAdlsContainerBronze')]"
-					},
-					"ETL-Trigger_properties_Extract-Pipeline_parameters_SourceTableName": {
-						"value": "[parameters('ETL-Trigger_properties_Extract-Pipeline_parameters_SourceTableName')]"
 					}
 				}
 			},

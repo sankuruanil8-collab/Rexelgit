@@ -41,18 +41,6 @@
 		"rexelcosmosdb_properties_typeProperties_connectionString_secretName": {
 			"value": "cosmosdbsecretnew"
 		},
-		"ETL-Trigger_properties_Extract-Pipeline_parameters_SourceAdlsContainer": {
-			"value": "rawinput"
-		},
-		"ETL-Trigger_properties_Extract-Pipeline_parameters_SinkAdlsContainerBronze": {
-			"value": "bronze"
-		},
-		"ETL-Trigger_properties_Extract-Pipeline_parameters_SourceTableName": {
-			"value": "employees"
-		},
-		"EventTriggerBlobtoADLS1_properties_typeProperties_scope": {
-			"value": "/subscriptions/398fed49-ff5a-4b9d-869b-7f3b9182afb2/resourceGroups/RexelHoldings/providers/Microsoft.Storage/storageAccounts/rexelblob"
-		},
 		"containerUri": {
 			"value": ""
 		},
