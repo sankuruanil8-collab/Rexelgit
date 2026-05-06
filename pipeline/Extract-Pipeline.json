@@ -906,7 +906,7 @@
 							{
 								"source": {
 									"name": "Date",
-									"type": "DateTime",
+									"type": "Date",
 									"physicalType": "String"
 								},
 								"sink": {
@@ -1041,7 +1041,7 @@
 			},
 			"LoadType": {
 				"type": "string",
-				"defaultValue": "Anil"
+				"defaultValue": "AnilDelta"
 			},
 			"Date": {
 				"type": "string"
