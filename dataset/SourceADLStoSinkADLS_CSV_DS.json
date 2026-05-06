@@ -1,6 +1,7 @@
 {
-	"name": "SourcenSinkADLS_CSV_DS",
+	"name": "SourceADLStoSinkADLS_CSV_DS",
 	"properties": {
+		"description": "RawInput to Bronze inside ADLS",
 		"linkedServiceName": {
 			"referenceName": "AzureDataLakeStorage1",
 			"type": "LinkedServiceReference"

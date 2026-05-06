@@ -1,13 +1,15 @@
 {
-	"name": "AdlsSinkBronzeDS",
+	"name": "AdlsSinkBronzeExceltoCSVDS",
 	"properties": {
-		"description": "Mysql to Bronze (incremental model)",
 		"linkedServiceName": {
 			"referenceName": "AzureDataLakeStorage1",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"ContainerName": {
+			"FileName": {
+				"type": "string"
+			},
+			"Container": {
 				"type": "string"
 			}
 		},
@@ -17,11 +19,11 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"fileName": {
-					"value": "@concat('employees_', formatDateTime(pipeline().parameters.Date, 'yyyy'), formatDateTime(pipeline().parameters.Date, 'MM'), formatDateTime(pipeline().parameters.Date, 'dd'), '.csv')",
+					"value": "@dataset().FileName",
 					"type": "Expression"
 				},
 				"fileSystem": {
-					"value": "@dataset().ContainerName",
+					"value": "@dataset().Container",
 					"type": "Expression"
 				}
 			},
