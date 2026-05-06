@@ -77,7 +77,7 @@
 				"name": "CopyCosmostoBronze",
 				"type": "Copy",
 				"state": "Inactive",
-				"onInactiveMarkAs": "Skipped",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.00:15:00",
