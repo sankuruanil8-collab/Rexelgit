@@ -149,7 +149,7 @@
 						]
 					},
 					{
-						"activity": "ForEach1",
+						"activity": "Copy Blob to Bronze",
 						"dependencyConditions": [
 							"Failed"
 						]
@@ -455,7 +455,7 @@
 						]
 					},
 					{
-						"activity": "ForEach1",
+						"activity": "Copy Blob to Bronze",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -478,7 +478,7 @@
 				}
 			},
 			{
-				"name": "Get Metadata1",
+				"name": "Get Blob Excel File Names",
 				"type": "GetMetadata",
 				"dependsOn": [],
 				"policy": {
@@ -511,11 +511,11 @@
 				}
 			},
 			{
-				"name": "ForEach1",
+				"name": "Copy Blob to Bronze",
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Get Metadata1",
+						"activity": "Get Blob Excel File Names",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -524,7 +524,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Get Metadata1').output.childItems",
+						"value": "@activity('Get Blob Excel File Names').output.childItems",
 						"type": "Expression"
 					},
 					"activities": [
