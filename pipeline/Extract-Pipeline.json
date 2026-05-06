@@ -76,14 +76,9 @@
 			{
 				"name": "CopyCosmostoBronze",
 				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "Stored procedure",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"state": "Inactive",
+				"onInactiveMarkAs": "Failed",
+				"dependsOn": [],
 				"policy": {
 					"timeout": "0.00:15:00",
 					"retry": 0,
@@ -209,6 +204,24 @@
 						"dependencyConditions": [
 							"Failed"
 						]
+					},
+					{
+						"activity": "CopyADLStoBronze",
+						"dependencyConditions": [
+							"Failed"
+						]
+					},
+					{
+						"activity": "CopyBlobtoBronze",
+						"dependencyConditions": [
+							"Failed"
+						]
+					},
+					{
+						"activity": "Mysql to Bronze Incremental Model",
+						"dependencyConditions": [
+							"Failed"
+						]
 					}
 				],
 				"policy": {
@@ -314,7 +327,7 @@
 				}
 			},
 			{
-				"name": "Incremental Model",
+				"name": "Mysql to Bronze Incremental Model",
 				"type": "IfCondition",
 				"dependsOn": [],
 				"userProperties": [],
@@ -450,7 +463,8 @@
 									},
 									"formatSettings": {
 										"type": "DelimitedTextWriteSettings",
-										"quoteAllText": true
+										"quoteAllText": true,
+										"fileExtension": ".txt"
 									}
 								},
 								"enableStaging": false,
@@ -510,7 +524,7 @@
 						]
 					},
 					{
-						"activity": "Incremental Model",
+						"activity": "Mysql to Bronze Incremental Model",
 						"dependencyConditions": [
 							"Succeeded"
 						]
