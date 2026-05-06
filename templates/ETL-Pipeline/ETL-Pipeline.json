@@ -1,0 +1,1651 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name"
+		},
+		"AzureSqlDatabase1": {
+			"type": "string"
+		},
+		"AzureDataLakeStorage1": {
+			"type": "string"
+		},
+		"rexelcosmosdb": {
+			"type": "string"
+		},
+		"AzureBlobStorage1": {
+			"type": "string"
+		},
+		"MySql1": {
+			"type": "string"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/ETL-Pipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CopyADLStoBronze",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.00:15:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ""
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SourceADLStoSinkADLS_CSV_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"Container": {
+										"value": "@pipeline().parameters.SourceAdlsContainer",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "SourceADLStoSinkADLS_CSV_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"Container": {
+										"value": "@pipeline().parameters.BronzeContainer",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "CopyCosmostoBronze",
+						"type": "Copy",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.00:15:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "CosmosDbSqlApiSource",
+								"query": "select * from rexelcosmoscontainer",
+								"preferredRegions": [],
+								"detectDatetime": true
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ""
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "SourceCosmosDS",
+								"type": "DatasetReference"
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "SourceADLStoSinkADLS_CSV_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"Container": {
+										"value": "@pipeline().parameters.BronzeContainer",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "Web1",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "CopyCosmostoBronze",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "CopyADLStoBronze",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "Mysql to Bronze Incremental Model",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "Copy Blob to Bronze",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "BronzeToSilverDataFlow",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "CopySilverToGold",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "CopyGoldToSQLDB",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "Stored procedure",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"method": "POST",
+							"url": "https://prod-19.northcentralus.logic.azure.com:443/workflows/f2df9c010a4e4c2c90a77a2a6bca46e4/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=Qdm8-Z17dJwhCdLG20zUn8KbpQGuxLvMB3wJtnVnenQ",
+							"body": {
+								"type": "object",
+								"properties": {
+									"adf": {
+										"type": "string"
+									},
+									"pipeline": {
+										"type": "string"
+									}
+								}
+							}
+						}
+					},
+					{
+						"name": "Stored procedure",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "CopyGoldToSQLDB",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:15:00",
+							"retry": 1,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "dbo.Incremental_load",
+							"storedProcedureParameters": {
+								"LoadType": {
+									"value": {
+										"value": "@pipeline().parameters.LoadType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"Pipeline_run_ID": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"Pipeline_trigger_ID": {
+									"value": {
+										"value": "@pipeline().TriggerId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"Pipeline_Trigger_time": {
+									"value": {
+										"value": "@pipeline().TriggerTime",
+										"type": "Expression"
+									},
+									"type": "DateTime"
+								},
+								"PipelineName": {
+									"value": {
+										"value": "@pipeline().Pipeline",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"PipelineTriggerName": {
+									"value": {
+										"value": "@pipeline().TriggerName",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"PipelineTriggerType": {
+									"value": {
+										"value": "@pipeline().TriggerType",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "[parameters('AzureSqlDatabase1')]",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Mysql to Bronze Incremental Model",
+						"type": "IfCondition",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(toLower(pipeline().parameters.LoadType), 'full')",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "CopyMySqltoBrozeDelta",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "Last Pipeline Run Date",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.00:15:00",
+										"retry": 1,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "MySqlSource",
+											"query": {
+												"value": "@concat('select * from employees where created_at >= ''',\nactivity('Last Pipeline Run Date').output.firstRow.LastRunDate,\n'''')",
+												"type": "Expression"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ""
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "SourceMySqlDS",
+											"type": "DatasetReference",
+											"parameters": {
+												"MySQLTableName": {
+													"value": "@pipeline().parameters.SourceTableName",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "AdlsSinkBronzeDS",
+											"type": "DatasetReference",
+											"parameters": {
+												"ContainerName": {
+													"value": "@pipeline().parameters.BronzeContainer",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "Last Pipeline Run Date",
+									"type": "Lookup",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.00:15:00",
+										"retry": 1,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": "SELECT max(LastUpdated) AS LastRunDate FROM Pipeline_Log_Table;",
+											"queryTimeout": "00:15:00",
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "AzureSqlSinkDS",
+											"type": "DatasetReference",
+											"parameters": {
+												"TableName": "dbo.Pipeline_Log_Table"
+											}
+										}
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "CopyMySqltoBrozeFull",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.00:15:00",
+										"retry": 1,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "MySqlSource"
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "SourceMySqlDS",
+											"type": "DatasetReference",
+											"parameters": {
+												"MySQLTableName": {
+													"value": "@pipeline().parameters.SourceTableName",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "AdlsSinkBronzeDS",
+											"type": "DatasetReference",
+											"parameters": {
+												"ContainerName": {
+													"value": "@pipeline().parameters.BronzeContainer",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "Get Blob Excel File Names",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "SourceBlobExcelDS",
+								"type": "DatasetReference",
+								"parameters": {
+									"Container": {
+										"value": "@pipeline().parameters.SourceBlobContainer",
+										"type": "Expression"
+									},
+									"FileName": "*"
+								}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"enablePartitionDiscovery": false
+							}
+						}
+					},
+					{
+						"name": "Copy Blob to Bronze",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Blob Excel File Names",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Blob Excel File Names').output.childItems",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "CopyBlobtoBronze",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.00:15:00",
+										"retry": 1,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "ExcelSource",
+											"storeSettings": {
+												"type": "AzureBlobStorageReadSettings",
+												"recursive": true,
+												"enablePartitionDiscovery": false
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".csv"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "SourceBlobExcelDS",
+											"type": "DatasetReference",
+											"parameters": {
+												"Container": {
+													"value": "@pipeline().parameters.SourceBlobContainer",
+													"type": "Expression"
+												},
+												"FileName": "@item().name"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "AdlsSinkBronzeExceltoCSVDS",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": "@replace(item().name,'.xlsx','.csv')",
+												"Container": {
+													"value": "@pipeline().parameters.BronzeContainer",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "BronzeToSilverDataFlow",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "Copy Blob to Bronze",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "CopyADLStoBronze",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Mysql to Bronze Incremental Model",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "CopyCosmostoBronze",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:15:00",
+							"retry": 1,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "Transformation_Dataflow",
+								"type": "DataFlowReference",
+								"datasetParameters": {
+									"Sales": {
+										"Container": {
+											"value": "@pipeline().parameters.BronzeContainer",
+											"type": "Expression"
+										},
+										"FileName": {
+											"value": "@pipeline().parameters.FileName1",
+											"type": "Expression"
+										}
+									},
+									"Product": {
+										"Container": {
+											"value": "@pipeline().parameters.BronzeContainer",
+											"type": "Expression"
+										},
+										"FileName": {
+											"value": "@pipeline().parameters.FileName2",
+											"type": "Expression"
+										}
+									},
+									"Category": {
+										"Container": {
+											"value": "@pipeline().parameters.BronzeContainer",
+											"type": "Expression"
+										},
+										"FileName": {
+											"value": "@pipeline().parameters.FileName3",
+											"type": "Expression"
+										}
+									},
+									"Geography": {
+										"Container": {
+											"value": "@pipeline().parameters.BronzeContainer",
+											"type": "Expression"
+										},
+										"FileName": {
+											"value": "@pipeline().parameters.FileName4",
+											"type": "Expression"
+										}
+									},
+									"SalesRep": {
+										"Container": {
+											"value": "@pipeline().parameters.BronzeContainer",
+											"type": "Expression"
+										},
+										"FileName": {
+											"value": "@pipeline().parameters.FileName5",
+											"type": "Expression"
+										}
+									},
+									"SubCategory": {
+										"Container": {
+											"value": "@pipeline().parameters.BronzeContainer",
+											"type": "Expression"
+										},
+										"FileName": {
+											"value": "@pipeline().parameters.FileName6",
+											"type": "Expression"
+										}
+									},
+									"SilverSink": {
+										"Container": {
+											"value": "@pipeline().parameters.SilverContainer",
+											"type": "Expression"
+										}
+									}
+								}
+							},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "CopySilverToGold",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "BronzeToSilverDataFlow",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:15:00",
+							"retry": 1,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "FinalTransformedFile.csv",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "SaleID",
+											"type": "Int32",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "SaleID",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "ProductID",
+											"type": "Int32",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "ProductID",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "ProductName",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "ProductName",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "CategoryID",
+											"type": "Int32",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "CategoryID",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "CategoryName",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "CategoryName",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "SubCategoryID",
+											"type": "Int32",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "SubCategoryID",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "SubCategoryName",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "SubCategoryName",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "GeographyID",
+											"type": "Int32",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "GeographyID",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Region",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Region",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Country",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Country",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "SalesRepID",
+											"type": "Int32",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "SalesRepID",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "SalesRepName",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "SalesRepName",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Amount",
+											"type": "Int32",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Amount",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Date",
+											"type": "Date",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Date",
+											"type": "String",
+											"physicalType": "String"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SourceADLStoSinkADLS_CSV_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"Container": {
+										"value": "@pipeline().parameters.SilverContainer",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "SourceADLStoSinkADLS_CSV_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"Container": {
+										"value": "@pipeline().parameters.GoldContainer",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "CopyGoldToSQLDB",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "CopySilverToGold",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:15:00",
+							"retry": 1,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "FinalTransformedFile.csv",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": {
+									"value": "@concat('Truncate Table ',pipeline().parameters.SinkTableName)",
+									"type": "Expression"
+								},
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SourceADLStoSinkADLS_CSV_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"Container": {
+										"value": "@pipeline().parameters.GoldContainer",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "AzureSqlSinkDS",
+								"type": "DatasetReference",
+								"parameters": {
+									"TableName": {
+										"value": "@pipeline().parameters.SinkTableName",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"parameters": {
+					"SourceAdlsContainer": {
+						"type": "string",
+						"defaultValue": "rawinput"
+					},
+					"SourceTableName": {
+						"type": "string",
+						"defaultValue": "employees"
+					},
+					"SourceBlobContainer": {
+						"type": "string",
+						"defaultValue": "input"
+					},
+					"LoadType": {
+						"type": "string",
+						"defaultValue": "AnilDelta"
+					},
+					"Date": {
+						"type": "string"
+					},
+					"BronzeContainer": {
+						"type": "string",
+						"defaultValue": "bronze"
+					},
+					"SilverContainer": {
+						"type": "string",
+						"defaultValue": "silver"
+					},
+					"FileName1": {
+						"type": "string",
+						"defaultValue": "Sales_2023.csv"
+					},
+					"FileName2": {
+						"type": "string",
+						"defaultValue": "Products.csv"
+					},
+					"FileName3": {
+						"type": "string",
+						"defaultValue": "Categories.csv"
+					},
+					"FileName4": {
+						"type": "string",
+						"defaultValue": "Geography.csv"
+					},
+					"FileName5": {
+						"type": "string",
+						"defaultValue": "SalesRep.csv"
+					},
+					"FileName6": {
+						"type": "string",
+						"defaultValue": "SubCategories.csv"
+					},
+					"GoldContainer": {
+						"type": "string",
+						"defaultValue": "gold"
+					},
+					"SinkTableName": {
+						"type": "string",
+						"defaultValue": "Final_Sales_Data"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SourceADLStoSinkADLS_CSV_DS')]",
+				"[concat(variables('factoryId'), '/datasets/SourceCosmosDS')]",
+				"[concat(variables('factoryId'), '/datasets/SourceBlobExcelDS')]",
+				"[concat(variables('factoryId'), '/dataflows/Transformation_Dataflow')]",
+				"[concat(variables('factoryId'), '/datasets/AzureSqlSinkDS')]",
+				"[concat(variables('factoryId'), '/datasets/SourceMySqlDS')]",
+				"[concat(variables('factoryId'), '/datasets/AdlsSinkBronzeDS')]",
+				"[concat(variables('factoryId'), '/datasets/AdlsSinkBronzeExceltoCSVDS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SourceADLStoSinkADLS_CSV_DS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "RawInput to Bronze inside ADLS",
+				"linkedServiceName": {
+					"referenceName": "[parameters('AzureDataLakeStorage1')]",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Container": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": {
+							"value": "@dataset().Container",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SourceCosmosDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "[parameters('rexelcosmosdb')]",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "CosmosDbSqlApiCollection",
+				"schema": {},
+				"typeProperties": {
+					"collectionName": "rexelcosmoscontainer"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SourceBlobExcelDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "[parameters('AzureBlobStorage1')]",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Container": {
+						"type": "string"
+					},
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Excel",
+				"typeProperties": {
+					"sheetName": "Sheet1",
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().Container",
+							"type": "Expression"
+						}
+					},
+					"firstRowAsHeader": true
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Transformation_Dataflow')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "AdlsSourceBronzeDSDF",
+								"type": "DatasetReference"
+							},
+							"name": "Sales"
+						},
+						{
+							"dataset": {
+								"referenceName": "AdlsSourceBronzeDSDF",
+								"type": "DatasetReference"
+							},
+							"name": "Product"
+						},
+						{
+							"dataset": {
+								"referenceName": "AdlsSourceBronzeDSDF",
+								"type": "DatasetReference"
+							},
+							"name": "Category"
+						},
+						{
+							"dataset": {
+								"referenceName": "AdlsSourceBronzeDSDF",
+								"type": "DatasetReference"
+							},
+							"name": "Geography"
+						},
+						{
+							"dataset": {
+								"referenceName": "AdlsSourceBronzeDSDF",
+								"type": "DatasetReference"
+							},
+							"name": "SalesRep"
+						},
+						{
+							"dataset": {
+								"referenceName": "AdlsSourceBronzeDSDF",
+								"type": "DatasetReference"
+							},
+							"name": "SubCategory"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "AdlsSinkSilverDSDF",
+								"type": "DatasetReference"
+							},
+							"name": "SilverSink"
+						}
+					],
+					"transformations": [
+						{
+							"name": "Join1"
+						},
+						{
+							"name": "join2"
+						},
+						{
+							"name": "join3"
+						},
+						{
+							"name": "join4"
+						},
+						{
+							"name": "join5"
+						},
+						{
+							"name": "SelectColumns"
+						},
+						{
+							"name": "FilterSaleID"
+						},
+						{
+							"name": "PartitionByWindow"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          SaleID as integer,",
+						"          Date as date,",
+						"          ProductID as integer,",
+						"          CategoryID as integer,",
+						"          SubCategoryID as integer,",
+						"          SalesRepID as integer,",
+						"          GeographyID as integer,",
+						"          Amount as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     partitionBy('hash', 1)) ~> Sales",
+						"source(output(",
+						"          ProductID as integer,",
+						"          ProductName as string,",
+						"          CategoryID as integer,",
+						"          SubCategoryID as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     partitionBy('hash', 1)) ~> Product",
+						"source(output(",
+						"          CategoryID as integer,",
+						"          CategoryName as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     partitionBy('hash', 1)) ~> Category",
+						"source(output(",
+						"          GeographyID as integer,",
+						"          Country as string,",
+						"          Region as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     partitionBy('hash', 1)) ~> Geography",
+						"source(output(",
+						"          SalesRepID as integer,",
+						"          SalesRepName as string,",
+						"          Region as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     partitionBy('hash', 1)) ~> SalesRep",
+						"source(output(",
+						"          SubCategoryID as integer,",
+						"          SubCategoryName as string,",
+						"          CategoryID as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     partitionBy('hash', 1)) ~> SubCategory",
+						"Sales, Product join(Sales@ProductID == Product@ProductID,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     partitionBy('hash', 1),",
+						"     broadcast: 'auto')~> Join1",
+						"Join1, Category join(Sales@CategoryID == Category@CategoryID,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     partitionBy('hash', 1),",
+						"     broadcast: 'auto')~> join2",
+						"join2, Geography join(Sales@GeographyID == Geography@GeographyID,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     partitionBy('hash', 1),",
+						"     broadcast: 'auto')~> join3",
+						"join3, SalesRep join(Sales@SalesRepID == SalesRep@SalesRepID,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     partitionBy('hash', 1),",
+						"     broadcast: 'auto')~> join4",
+						"join4, SubCategory join(Sales@SubCategoryID == SubCategory@SubCategoryID,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     partitionBy('hash', 1),",
+						"     broadcast: 'auto')~> join5",
+						"join5 select(mapColumn(",
+						"          SaleID,",
+						"          ProductID = Sales@ProductID,",
+						"          ProductName,",
+						"          CategoryID = Sales@CategoryID,",
+						"          CategoryName,",
+						"          SubCategoryID = Sales@SubCategoryID,",
+						"          SubCategoryName,",
+						"          GeographyID = Sales@GeographyID,",
+						"          Region = Geography@Region,",
+						"          Country,",
+						"          SalesRepID = Sales@SalesRepID,",
+						"          SalesRepName,",
+						"          Amount,",
+						"          Date",
+						"     ),",
+						"     partitionBy('hash', 1),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> SelectColumns",
+						"PartitionByWindow filter(!isNull(SaleID) && rn == 1,",
+						"     partitionBy('hash', 1)) ~> FilterSaleID",
+						"SelectColumns window(over(SaleID),",
+						"     asc(Date, true),",
+						"     rn = rowNumber()) ~> PartitionByWindow",
+						"FilterSaleID sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     partitionFileNames:['FinalTransformedFile.csv'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> SilverSink"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/AdlsSourceBronzeDSDF')]",
+				"[concat(variables('factoryId'), '/datasets/AdlsSinkSilverDSDF')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlSinkDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "[parameters('AzureSqlDatabase1')]",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"TableName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": {
+						"value": "@dataset().TableName",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SourceMySqlDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "[parameters('MySql1')]",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"MySQLTableName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "MySqlTable",
+				"schema": [],
+				"typeProperties": {
+					"tableName": {
+						"value": "@dataset().MySQLTableName",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AdlsSinkBronzeDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Mysql to Bronze (incremental model)",
+				"linkedServiceName": {
+					"referenceName": "[parameters('AzureDataLakeStorage1')]",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"ContainerName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@concat('employees_', formatDateTime(pipeline().parameters.Date, 'yyyy'), formatDateTime(pipeline().parameters.Date, 'MM'), formatDateTime(pipeline().parameters.Date, 'dd'), '.csv')",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().ContainerName",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AdlsSinkBronzeExceltoCSVDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "[parameters('AzureDataLakeStorage1')]",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FileName": {
+						"type": "string"
+					},
+					"Container": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().Container",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AdlsSourceBronzeDSDF')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "[parameters('AzureDataLakeStorage1')]",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Container": {
+						"type": "string"
+					},
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "DataFlowDS"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().Container",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AdlsSinkSilverDSDF')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "[parameters('AzureDataLakeStorage1')]",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Container": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "DataFlowDS"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": {
+							"value": "@dataset().Container",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		}
+	]
+}
