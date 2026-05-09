@@ -1,0 +1,49 @@
+{
+	"name": "trigger1",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "ETL-Pipeline",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"SourceAdlsContainer": "rawinput",
+					"SourceTableName": "employees",
+					"SourceBlobContainer": "input",
+					"LoadType": "Delta",
+					"Date": "2026-05-08",
+					"BronzeContainer": "bronze",
+					"SilverContainer": "silver",
+					"FileName1": "Sales_2023.csv",
+					"FileName2": "Products.csv",
+					"FileName3": "Categories.csv",
+					"FileName4": "Geography.csv",
+					"FileName5": "SalesRep.csv",
+					"FileName6": "SubCategories.csv",
+					"GoldContainer": "gold",
+					"SinkTableName": "Final_Sales_Data"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2026-05-09T14:27:00",
+				"timeZone": "India Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						21
+					]
+				}
+			}
+		}
+	}
+}

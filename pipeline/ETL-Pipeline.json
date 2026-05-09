@@ -489,6 +489,7 @@
 					],
 					"storeSettings": {
 						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
 						"enablePartitionDiscovery": false
 					}
 				}
@@ -1044,7 +1045,8 @@
 				"defaultValue": "AnilDelta"
 			},
 			"Date": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "2026-05-08"
 			},
 			"BronzeContainer": {
 				"type": "string",
