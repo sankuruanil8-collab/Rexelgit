@@ -55,6 +55,66 @@
 			"type": "string",
 			"defaultValue": "cosmosdbsecretnew"
 		},
+		"trigger1_properties_ETL-Pipeline_parameters_SourceAdlsContainer": {
+			"type": "string",
+			"defaultValue": "rawinput"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_SourceTableName": {
+			"type": "string",
+			"defaultValue": "employees"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_SourceBlobContainer": {
+			"type": "string",
+			"defaultValue": "input"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_LoadType": {
+			"type": "string",
+			"defaultValue": "Delta"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_Date": {
+			"type": "string",
+			"defaultValue": "2026-05-08"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_BronzeContainer": {
+			"type": "string",
+			"defaultValue": "bronze"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_SilverContainer": {
+			"type": "string",
+			"defaultValue": "silver"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_FileName1": {
+			"type": "string",
+			"defaultValue": "Sales_2023.csv"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_FileName2": {
+			"type": "string",
+			"defaultValue": "Products.csv"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_FileName3": {
+			"type": "string",
+			"defaultValue": "Categories.csv"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_FileName4": {
+			"type": "string",
+			"defaultValue": "Geography.csv"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_FileName5": {
+			"type": "string",
+			"defaultValue": "SalesRep.csv"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_FileName6": {
+			"type": "string",
+			"defaultValue": "SubCategories.csv"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_GoldContainer": {
+			"type": "string",
+			"defaultValue": "gold"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_SinkTableName": {
+			"type": "string",
+			"defaultValue": "Final_Sales_Data"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -117,6 +177,51 @@
 					},
 					"rexelcosmosdb_properties_typeProperties_connectionString_secretName": {
 						"value": "[parameters('rexelcosmosdb_properties_typeProperties_connectionString_secretName')]"
+					},
+					"trigger1_properties_ETL-Pipeline_parameters_SourceAdlsContainer": {
+						"value": "[parameters('trigger1_properties_ETL-Pipeline_parameters_SourceAdlsContainer')]"
+					},
+					"trigger1_properties_ETL-Pipeline_parameters_SourceTableName": {
+						"value": "[parameters('trigger1_properties_ETL-Pipeline_parameters_SourceTableName')]"
+					},
+					"trigger1_properties_ETL-Pipeline_parameters_SourceBlobContainer": {
+						"value": "[parameters('trigger1_properties_ETL-Pipeline_parameters_SourceBlobContainer')]"
+					},
+					"trigger1_properties_ETL-Pipeline_parameters_LoadType": {
+						"value": "[parameters('trigger1_properties_ETL-Pipeline_parameters_LoadType')]"
+					},
+					"trigger1_properties_ETL-Pipeline_parameters_Date": {
+						"value": "[parameters('trigger1_properties_ETL-Pipeline_parameters_Date')]"
+					},
+					"trigger1_properties_ETL-Pipeline_parameters_BronzeContainer": {
+						"value": "[parameters('trigger1_properties_ETL-Pipeline_parameters_BronzeContainer')]"
+					},
+					"trigger1_properties_ETL-Pipeline_parameters_SilverContainer": {
+						"value": "[parameters('trigger1_properties_ETL-Pipeline_parameters_SilverContainer')]"
+					},
+					"trigger1_properties_ETL-Pipeline_parameters_FileName1": {
+						"value": "[parameters('trigger1_properties_ETL-Pipeline_parameters_FileName1')]"
+					},
+					"trigger1_properties_ETL-Pipeline_parameters_FileName2": {
+						"value": "[parameters('trigger1_properties_ETL-Pipeline_parameters_FileName2')]"
+					},
+					"trigger1_properties_ETL-Pipeline_parameters_FileName3": {
+						"value": "[parameters('trigger1_properties_ETL-Pipeline_parameters_FileName3')]"
+					},
+					"trigger1_properties_ETL-Pipeline_parameters_FileName4": {
+						"value": "[parameters('trigger1_properties_ETL-Pipeline_parameters_FileName4')]"
+					},
+					"trigger1_properties_ETL-Pipeline_parameters_FileName5": {
+						"value": "[parameters('trigger1_properties_ETL-Pipeline_parameters_FileName5')]"
+					},
+					"trigger1_properties_ETL-Pipeline_parameters_FileName6": {
+						"value": "[parameters('trigger1_properties_ETL-Pipeline_parameters_FileName6')]"
+					},
+					"trigger1_properties_ETL-Pipeline_parameters_GoldContainer": {
+						"value": "[parameters('trigger1_properties_ETL-Pipeline_parameters_GoldContainer')]"
+					},
+					"trigger1_properties_ETL-Pipeline_parameters_SinkTableName": {
+						"value": "[parameters('trigger1_properties_ETL-Pipeline_parameters_SinkTableName')]"
 					}
 				}
 			},

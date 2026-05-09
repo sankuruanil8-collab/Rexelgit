@@ -41,6 +41,51 @@
 		"rexelcosmosdb_properties_typeProperties_connectionString_secretName": {
 			"value": "cosmosdbsecretnew"
 		},
+		"trigger1_properties_ETL-Pipeline_parameters_SourceAdlsContainer": {
+			"value": "rawinput"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_SourceTableName": {
+			"value": "employees"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_SourceBlobContainer": {
+			"value": "input"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_LoadType": {
+			"value": "Delta"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_Date": {
+			"value": "2026-05-08"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_BronzeContainer": {
+			"value": "bronze"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_SilverContainer": {
+			"value": "silver"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_FileName1": {
+			"value": "Sales_2023.csv"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_FileName2": {
+			"value": "Products.csv"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_FileName3": {
+			"value": "Categories.csv"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_FileName4": {
+			"value": "Geography.csv"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_FileName5": {
+			"value": "SalesRep.csv"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_FileName6": {
+			"value": "SubCategories.csv"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_GoldContainer": {
+			"value": "gold"
+		},
+		"trigger1_properties_ETL-Pipeline_parameters_SinkTableName": {
+			"value": "Final_Sales_Data"
+		},
 		"containerUri": {
 			"value": ""
 		},
