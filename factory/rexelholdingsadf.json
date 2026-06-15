@@ -1,0 +1,15 @@
+{
+	"name": "rexelholdingsadf",
+	"properties": {
+		"trustModeClaimForMi": {
+			"value": "Disabled",
+			"editable": true
+		}
+	},
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "5d71a8fc-f77c-4930-a19d-2083a9774d83",
+		"tenantId": "64d4c652-0406-45b4-9ba4-120314dd2c16"
+	}
+}
