@@ -10,7 +10,8 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileSystem": "bronze"
+				"fileName": "Products.csv",
+				"fileSystem": "rawinput"
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",
