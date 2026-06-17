@@ -1,0 +1,13 @@
+{
+	"name": "AzureDatabricks1",
+	"properties": {
+		"annotations": [],
+		"type": "AzureDatabricks",
+		"typeProperties": {
+			"domain": "https://adb-7405604910724599.19.azuredatabricks.net",
+			"authentication": "MSI",
+			"workspaceResourceId": "/subscriptions/63179df7-4365-433f-b6f9-04ab687f2927/resourceGroups/RexelHoldings/providers/Microsoft.Databricks/workspaces/rexelholdingsadb",
+			"existingClusterId": "0615-093529-6n2xubvm"
+		}
+	}
+}
